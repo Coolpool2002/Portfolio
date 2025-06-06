@@ -60,10 +60,44 @@
     <button onclick="showMenu()">Back</button>
   </div>
 
-  <!-- FIXED: Added missing canvas element with id="game" -->
   <canvas id="game" width="400" height="600"></canvas>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, push, set, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
+      authDomain: "flappy-ball-2-leaderboard.firebaseapp.com",
+      projectId: "flappy-ball-2-leaderboard",
+      storageBucket: "flappy-ball-2-leaderboard.firebaseapp.com",
+      messagingSenderId: "678584043682",
+      appId: "1:678584043682:web:869514b82e6b4676c82ffb",
+      measurementId: "G-6MDV8B1CCP",
+      databaseURL: "https://flappy-ball-2-leaderboard-default-rtdb.firebaseio.com"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.saveScore = async (name, score) => {
+      const scoresRef = ref(db, "scores");
+      const newScoreRef = push(scoresRef);
+      await set(newScoreRef, {
+        name,
+        score,
+        timestamp: Date.now()
+      });
+    };
+
+    window.loadTopScores = async () => {
+      const scoresQuery = query(ref(db, "scores"), orderByChild("score"), limitToLast(10));
+      const snapshot = await get(scoresQuery);
+      if (!snapshot.exists()) return [];
+      const scores = Object.values(snapshot.val());
+      return scores.sort((a, b) => b.score - a.score);
+    };
+
     const users = { admin: "admin123" };
     let currentUser = null;
     const loginView = document.getElementById('loginView');
@@ -147,6 +181,8 @@
     }
 
     async function showRecords() {
+      menu.style.display = 'none';
+      recordView.style.display = 'block';
       recordList.innerHTML = 'Loading...';
       try {
         const scores = await window.loadTopScores();
@@ -161,11 +197,9 @@
           });
         }
       } catch (error) {
-        recordList.innerHTML = 'Failed to load scores.';
         console.error('Error loading scores:', error);
+        recordList.innerHTML = 'Failed to load scores.';
       }
-      menu.style.display = 'none';
-      recordView.style.display = 'block';
     }
 
     function register() {
@@ -253,9 +287,11 @@
           ctx.fillRect(pipe.x, 0, 50, pipe.top);
           ctx.fillRect(pipe.x, pipe.bottom, 50, 600 - pipe.bottom);
 
-          if (100 + 20 > pipe.x && 100 - 20 < pipe.x + 50 && (y - 20 < pipe.top || y + 20 > pipe.bottom)) {
-            return gameOver();
-          }
+          if (
+            100 + 20 > pipe.x &&
+            100 - 20 < pipe.x + 50 &&
+            (y - 20 < pipe.top || y + 20 > pipe.bottom)
+          ) return gameOver();
         }
 
         if (redDot && !redDot.collected) {
@@ -290,42 +326,6 @@
     }
 
     showLogin();
-  </script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, push, set, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
-      authDomain: "flappy-ball-2-leaderboard.firebaseapp.com",
-      projectId: "flappy-ball-2-leaderboard",
-      storageBucket: "flappy-ball-2-leaderboard.appspot.com",
-      messagingSenderId: "678584043682",
-      appId: "1:678584043682:web:869514b82e6b4676c82ffb",
-      measurementId: "G-6MDV8B1CCP",
-      databaseURL: "https://flappy-ball-2-leaderboard-default-rtdb.firebaseio.com"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    window.saveScore = async (name, score) => {
-      const scoresRef = ref(db, "scores");
-      const newScoreRef = push(scoresRef);
-      await set(newScoreRef, {
-        name,
-        score,
-        timestamp: Date.now()
-      });
-    };
-
-    window.loadTopScores = async () => {
-      const scoresQuery = query(ref(db, "scores"), orderByChild("score"), limitToLast(10));
-      const snapshot = await get(scoresQuery);
-      if (!snapshot.exists()) return [];
-      const scores = Object.values(snapshot.val());
-      return scores.sort((a, b) => b.score - a.score);
-    };
   </script>
 </body>
 </html>
