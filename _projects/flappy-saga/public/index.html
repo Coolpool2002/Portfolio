@@ -268,27 +268,39 @@
       }
     }
 
-    // Records (dummy)
-    window.loadTopScores = async () => [
-      { name: "admin", score: 42 },
-      { name: "Guest", score: 12 }
-    ];
-    async function showRecords() {
-      hideAllViews();
-      recordView.style.display = "block";
-      recordList.innerHTML = "Loading...";
-      const scores = await window.loadTopScores();
-      recordList.innerHTML = "";
-      if (scores.length === 0) {
-        recordList.innerHTML = "No records found.";
-      } else {
-        scores.forEach(r => {
-          const div = document.createElement("div");
-          div.textContent = `${r.name}: ${r.score} points`;
-          recordList.appendChild(div);
-        });
-      }
-    }
+// Records (Firebase dynamic)
+window.loadTopScores = async () => {
+  const res = await fetch('https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app/scores.json');
+  const data = await res.json();
+  if (!data) return [];
+
+  return Object.entries(data)
+    .map(([id, record]) => ({
+      id,
+      name: record?.name || "Unknown",
+      score: typeof record?.score === "number" ? record.score : 0
+    }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10);
+};
+
+async function showRecords() {
+  hideAllViews();
+  recordView.style.display = "block";
+  recordList.innerHTML = "Loading...";
+  const scores = await window.loadTopScores();
+  recordList.innerHTML = "";
+  if (scores.length === 0) {
+    recordList.innerHTML = "No records found.";
+  } else {
+    scores.forEach(r => {
+      const div = document.createElement("div");
+      div.textContent = `${r.name}: ${r.score} points`;
+      recordList.appendChild(div);
+    });
+  }
+}
+
 
     // Game + Customization
     let selectedBackground = "sky";
