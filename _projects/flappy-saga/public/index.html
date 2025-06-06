@@ -27,37 +27,37 @@
     <h1>Login</h1>
     <input type="text" id="loginUsername" placeholder="Username"><br>
     <input type="password" id="loginPassword" placeholder="Password"><br>
-    <button onclick="login()">Login</button>
-    <p>Don't have an account? <a href="#" onclick="showRegister()">Register here</a></p>
-    <p><a href="#" onclick="skipLogin()">Sign in as Guest</a></p>
+    <button id="loginButton">Login</button>
+    <p>Don't have an account? <a href="#" id="showRegisterLink">Register here</a></p>
+    <p><a href="#" id="guestLink">Sign in as Guest</a></p>
   </div>
 
   <div id="registerView">
     <h1>Register</h1>
     <input type="text" id="registerUsername" placeholder="Username"><br>
     <input type="password" id="registerPassword" placeholder="Password"><br>
-    <button onclick="register()">Register</button>
-    <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+    <button id="registerButton">Register</button>
+    <p>Already have an account? <a href="#" id="showLoginLink">Login</a></p>
   </div>
 
   <div id="menu">
     <h1>Welcome, <span id="currentUser"></span></h1>
-    <button onclick="startGame()">Play Flappy Ball 2</button>
-    <button onclick="showUsers()">Manage Users</button>
-    <button onclick="showRecords()">View Records</button>
-    <button onclick="logout()">Logout</button>
+    <button id="startGameButton">Play Flappy Ball 2</button>
+    <button id="manageUsersButton">Manage Users</button>
+    <button id="viewRecordsButton">View Records</button>
+    <button id="logoutButton">Logout</button>
   </div>
 
   <div id="userListView">
     <h2>All Users</h2>
     <div id="userList"></div>
-    <button onclick="showMenu()">Back</button>
+    <button id="backFromUsersButton">Back</button>
   </div>
 
   <div id="recordView">
     <h2>All Scores</h2>
     <div id="recordList"></div>
-    <button onclick="showMenu()">Back</button>
+    <button id="backFromRecordsButton">Back</button>
   </div>
 
   <canvas id="game" width="400" height="600"></canvas>
@@ -81,99 +81,153 @@
     const db = getDatabase(app);
 
     window.saveScore = async (name, score) => {
-      const scoresRef = ref(db, "scores");
-      const newScoreRef = push(scoresRef);
-      await set(newScoreRef, {
-        name,
-        score,
-        timestamp: Date.now()
-      });
+      try {
+        const scoresRef = ref(db, "scores");
+        const newScoreRef = push(scoresRef);
+        await set(newScoreRef, {
+          name,
+          score,
+          timestamp: Date.now()
+        });
+      } catch (e) {
+        console.error("Failed to save score:", e);
+      }
     };
 
     window.loadTopScores = async () => {
-      const scoresQuery = query(ref(db, "scores"), orderByChild("score"), limitToLast(10));
-      const snapshot = await get(scoresQuery);
-      if (!snapshot.exists()) return [];
-      const scores = Object.values(snapshot.val());
-      return scores.sort((a, b) => b.score - a.score);
+      try {
+        const scoresQuery = query(ref(db, "scores"), orderByChild("score"), limitToLast(10));
+        const snapshot = await get(scoresQuery);
+        if (!snapshot.exists()) return [];
+        const scores = Object.values(snapshot.val());
+        return scores.sort((a, b) => b.score - a.score);
+      } catch (e) {
+        console.error("Failed to load scores:", e);
+        return [];
+      }
     };
 
     const users = { admin: "admin123" };
     let currentUser = null;
-    const loginView = document.getElementById('loginView');
-    const registerView = document.getElementById('registerView');
-    const menu = document.getElementById('menu');
-    const userListView = document.getElementById('userListView');
-    const userList = document.getElementById('userList');
-    const gameCanvas = document.getElementById('game');
-    const ctx = gameCanvas.getContext('2d');
-    const recordView = document.getElementById('recordView');
-    const recordList = document.getElementById('recordList');
+    const loginView = document.getElementById("loginView");
+    const registerView = document.getElementById("registerView");
+    const menu = document.getElementById("menu");
+    const userListView = document.getElementById("userListView");
+    const userList = document.getElementById("userList");
+    const gameCanvas = document.getElementById("game");
+    const ctx = gameCanvas.getContext("2d");
+    const recordView = document.getElementById("recordView");
+    const recordList = document.getElementById("recordList");
 
     function showLogin() {
-      loginView.style.display = 'block';
-      registerView.style.display = 'none';
-      menu.style.display = 'none';
-      gameCanvas.style.display = 'none';
-      userListView.style.display = 'none';
-      recordView.style.display = 'none';
+      loginView.style.display = "block";
+      registerView.style.display = "none";
+      menu.style.display = "none";
+      gameCanvas.style.display = "none";
+      userListView.style.display = "none";
+      recordView.style.display = "none";
     }
 
     function showRegister() {
-      loginView.style.display = 'none';
-      registerView.style.display = 'block';
-      menu.style.display = 'none';
-      gameCanvas.style.display = 'none';
-      userListView.style.display = 'none';
-      recordView.style.display = 'none';
+      loginView.style.display = "none";
+      registerView.style.display = "block";
+      menu.style.display = "none";
+      gameCanvas.style.display = "none";
+      userListView.style.display = "none";
+      recordView.style.display = "none";
     }
 
     function showMenu() {
-      document.getElementById('currentUser').textContent = currentUser || "Guest";
-      loginView.style.display = 'none';
-      registerView.style.display = 'none';
-      menu.style.display = 'block';
-      gameCanvas.style.display = 'none';
-      userListView.style.display = 'none';
-      recordView.style.display = 'none';
+      document.getElementById("currentUser").textContent = currentUser || "Guest";
+      loginView.style.display = "none";
+      registerView.style.display = "none";
+      menu.style.display = "block";
+      gameCanvas.style.display = "none";
+      userListView.style.display = "none";
+      recordView.style.display = "none";
     }
 
+    document.getElementById("loginButton").onclick = () => {
+      const user = document.getElementById("loginUsername").value;
+      const pass = document.getElementById("loginPassword").value;
+      if (users[user] === pass) {
+        currentUser = user;
+        showMenu();
+      } else {
+        alert("Incorrect login.");
+      }
+    };
+
+    document.getElementById("registerButton").onclick = () => {
+      const user = document.getElementById("registerUsername").value;
+      const pass = document.getElementById("registerPassword").value;
+      if (user && pass && !users[user]) {
+        users[user] = pass;
+        alert("Account created!");
+        showLogin();
+      } else {
+        alert("Invalid input or user exists.");
+      }
+    };
+
+    document.getElementById("guestLink").onclick = (e) => {
+      e.preventDefault();
+      currentUser = "Guest";
+      showMenu();
+    };
+
+    document.getElementById("showRegisterLink").onclick = (e) => {
+      e.preventDefault();
+      showRegister();
+    };
+
+    document.getElementById("showLoginLink").onclick = (e) => {
+      e.preventDefault();
+      showLogin();
+    };
+
+    document.getElementById("logoutButton").onclick = () => {
+      currentUser = null;
+      showLogin();
+    };
+
+    document.getElementById("startGameButton").onclick = () => startGame();
+    document.getElementById("manageUsersButton").onclick = () => showUsers();
+    document.getElementById("viewRecordsButton").onclick = () => showRecords();
+    document.getElementById("backFromUsersButton").onclick = () => showMenu();
+    document.getElementById("backFromRecordsButton").onclick = () => showMenu();
+
     function showUsers() {
-      userList.innerHTML = '';
-      Object.keys(users).forEach(function(user) {
-        const div = document.createElement('div');
-        div.style.textAlign = 'center';
-        div.style.marginBottom = '10px';
+      userList.innerHTML = "";
+      Object.keys(users).forEach(user => {
+        const div = document.createElement("div");
+        div.style.textAlign = "center";
+        div.style.marginBottom = "10px";
 
-        const span = document.createElement('span');
+        const span = document.createElement("span");
         span.textContent = user;
-        span.style.display = 'inline-block';
-        span.style.width = '200px';
-        span.style.color = 'white';
-
+        span.style.display = "inline-block";
+        span.style.width = "200px";
+        span.style.color = "white";
         div.appendChild(span);
 
-        if (currentUser === 'admin') {
-          const delBtn = document.createElement('button');
-          delBtn.textContent = 'Delete';
-          delBtn.disabled = user === 'admin';
-          delBtn.addEventListener('click', () => deleteUser(user));
+        if (currentUser === "admin") {
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "Delete";
+          delBtn.disabled = user === "admin";
+          delBtn.addEventListener("click", () => deleteUser(user));
           div.appendChild(delBtn);
         }
 
         userList.appendChild(div);
       });
-
-      menu.style.display = 'none';
-      userListView.style.display = 'block';
+      menu.style.display = "none";
+      userListView.style.display = "block";
     }
 
     function deleteUser(username) {
-      if (currentUser !== 'admin') {
-        alert('Only admin can delete users.');
-        return;
-      }
-      if (username === 'admin') return;
+      if (currentUser !== "admin") return alert("Only admin can delete users.");
+      if (username === "admin") return;
       if (confirm(`Are you sure you want to delete '${username}'?`)) {
         delete users[username];
         showUsers();
@@ -181,63 +235,25 @@
     }
 
     async function showRecords() {
-      menu.style.display = 'none';
-      recordView.style.display = 'block';
-      recordList.innerHTML = 'Loading...';
-      try {
-        const scores = await window.loadTopScores();
-        recordList.innerHTML = '';
-        if (scores.length === 0) {
-          recordList.innerHTML = 'No records found.';
-        } else {
-          scores.forEach(r => {
-            const div = document.createElement('div');
-            div.textContent = `${r.name}: ${r.score} points`;
-            recordList.appendChild(div);
-          });
-        }
-      } catch (error) {
-        console.error('Error loading scores:', error);
-        recordList.innerHTML = 'Failed to load scores.';
-      }
-    }
-
-    function register() {
-      const user = document.getElementById('registerUsername').value;
-      const pass = document.getElementById('registerPassword').value;
-      if (user && pass && !users[user]) {
-        users[user] = pass;
-        alert('Account created!');
-        showLogin();
+      menu.style.display = "none";
+      recordView.style.display = "block";
+      recordList.innerHTML = "Loading...";
+      const scores = await window.loadTopScores();
+      recordList.innerHTML = "";
+      if (scores.length === 0) {
+        recordList.innerHTML = "No records found.";
       } else {
-        alert('Invalid input or user exists.');
+        scores.forEach(r => {
+          const div = document.createElement("div");
+          div.textContent = `${r.name}: ${r.score} points`;
+          recordList.appendChild(div);
+        });
       }
-    }
-
-    function login() {
-      const user = document.getElementById('loginUsername').value;
-      const pass = document.getElementById('loginPassword').value;
-      if (users[user] === pass) {
-        currentUser = user;
-        showMenu();
-      } else {
-        alert('Incorrect login.');
-      }
-    }
-
-    function skipLogin() {
-      currentUser = "Guest";
-      showMenu();
-    }
-
-    function logout() {
-      currentUser = null;
-      showLogin();
     }
 
     function startGame() {
-      menu.style.display = 'none';
-      gameCanvas.style.display = 'block';
+      menu.style.display = "none";
+      gameCanvas.style.display = "block";
       runGame();
     }
 
@@ -256,16 +272,16 @@
         velocity = flapStrength;
       }
 
-      window.addEventListener('keydown', flap);
+      window.addEventListener("keydown", flap);
       const scoreInterval = setInterval(() => score++, 1000);
 
       function draw() {
         frame++;
         ctx.clearRect(0, 0, 400, 600);
-        ctx.fillStyle = 'skyblue';
+        ctx.fillStyle = "skyblue";
         ctx.fillRect(0, 0, 400, 600);
 
-        ctx.fillStyle = 'yellow';
+        ctx.fillStyle = "yellow";
         ctx.beginPath();
         ctx.arc(100, y, 20, 0, Math.PI * 2);
         ctx.fill();
@@ -281,7 +297,7 @@
           if (pipes.length % 10 === 0) redDot = { x: 425, y: topHeight + gap / 2, collected: false };
         }
 
-        ctx.fillStyle = 'green';
+        ctx.fillStyle = "green";
         for (let pipe of pipes) {
           pipe.x -= 2;
           ctx.fillRect(pipe.x, 0, 50, pipe.top);
@@ -296,7 +312,7 @@
 
         if (redDot && !redDot.collected) {
           redDot.x -= 2;
-          ctx.fillStyle = 'red';
+          ctx.fillStyle = "red";
           ctx.beginPath();
           ctx.arc(redDot.x, redDot.y, 14, 0, Math.PI * 2);
           ctx.fill();
@@ -308,17 +324,17 @@
           if (redDot.x < -10) redDot = null;
         }
 
-        ctx.fillStyle = 'black';
-        ctx.font = '16px Arial';
+        ctx.fillStyle = "black";
+        ctx.font = "16px Arial";
         ctx.fillText("SCORE: " + score + " points", 10, 20);
         requestAnimationFrame(draw);
       }
 
       function gameOver() {
         clearInterval(scoreInterval);
-        window.removeEventListener('keydown', flap);
-        saveScore(currentUser, score);
-        alert('Game Over! You earned: ' + score + ' points');
+        window.removeEventListener("keydown", flap);
+        window.saveScore(currentUser, score);
+        alert("Game Over! You earned: " + score + " points");
         showMenu();
       }
 
