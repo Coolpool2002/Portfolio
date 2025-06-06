@@ -134,7 +134,7 @@
     }
 
     function deleteUser(username) {
-      if (username === 'admin') return; // Prevent deleting admin
+      if (username === 'admin') return;
       if (confirm(`Are you sure you want to delete '${username}'?`)) {
         delete users[username];
         showUsers();
@@ -210,7 +210,7 @@
         velocity = flapStrength;
       }
 
-      document.addEventListener('keydown', flap);
+      window.addEventListener('keydown', flap);
       const scoreInterval = setInterval(() => score++, 1000);
 
       function draw() {
@@ -236,7 +236,7 @@
           const topHeight = Math.floor(Math.random() * 200) + 50;
           pipes.push({ x: 400, top: topHeight, bottom: topHeight + gap });
           if (pipes.length % 10 === 0) {
-            redDot = { x: 400 + 25, y: topHeight + gap / 2, collected: false };
+            redDot = { x: 425, y: topHeight + gap / 2, collected: false };
           }
         }
 
@@ -272,6 +272,7 @@
         }
 
         ctx.fillStyle = 'black';
+        ctx.font = '16px Arial';
         ctx.fillText("SCORE: " + score + " points", 10, 20);
         requestAnimationFrame(draw);
       }
@@ -280,7 +281,7 @@
         clearInterval(scoreInterval);
         records.push({ name: currentUser, score });
         alert('Game Over! You earned: ' + score + ' points');
-        document.removeEventListener('keydown', flap);
+        window.removeEventListener('keydown', flap);
         showMenu();
       }
 
