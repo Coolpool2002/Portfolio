@@ -60,6 +60,7 @@
     <button onclick="showMenu()">Back</button>
   </div>
 
+  <!-- FIXED: Added missing canvas element with id="game" -->
   <canvas id="game" width="400" height="600"></canvas>
 
   <script>
@@ -76,8 +77,8 @@
     const recordList = document.getElementById('recordList');
 
     function showLogin() {
-      registerView.style.display = 'none';
       loginView.style.display = 'block';
+      registerView.style.display = 'none';
       menu.style.display = 'none';
       gameCanvas.style.display = 'none';
       userListView.style.display = 'none';
@@ -148,7 +149,7 @@
     async function showRecords() {
       recordList.innerHTML = 'Loading...';
       try {
-        const scores = await loadTopScores();
+        const scores = await window.loadTopScores();
         recordList.innerHTML = '';
         if (scores.length === 0) {
           recordList.innerHTML = 'No records found.';
@@ -173,8 +174,6 @@
       if (user && pass && !users[user]) {
         users[user] = pass;
         alert('Account created!');
-        document.getElementById('registerUsername').value = '';
-        document.getElementById('registerPassword').value = '';
         showLogin();
       } else {
         alert('Invalid input or user exists.');
@@ -186,8 +185,6 @@
       const pass = document.getElementById('loginPassword').value;
       if (users[user] === pass) {
         currentUser = user;
-        document.getElementById('loginUsername').value = '';
-        document.getElementById('loginPassword').value = '';
         showMenu();
       } else {
         alert('Incorrect login.');
@@ -242,32 +239,22 @@
         velocity += gravity;
         y += velocity;
 
-        if (y > 580 || y < 0) {
-          gameOver();
-          return;
-        }
+        if (y > 580 || y < 0) return gameOver();
 
         if (frame % 90 === 0) {
           const topHeight = Math.floor(Math.random() * 200) + 50;
           pipes.push({ x: 400, top: topHeight, bottom: topHeight + gap });
-          if (pipes.length % 10 === 0) {
-            redDot = { x: 425, y: topHeight + gap / 2, collected: false };
-          }
+          if (pipes.length % 10 === 0) redDot = { x: 425, y: topHeight + gap / 2, collected: false };
         }
 
         ctx.fillStyle = 'green';
-        for (let i = 0; i < pipes.length; i++) {
-          pipes[i].x -= 2;
-          ctx.fillRect(pipes[i].x, 0, 50, pipes[i].top);
-          ctx.fillRect(pipes[i].x, pipes[i].bottom, 50, 600 - pipes[i].bottom);
+        for (let pipe of pipes) {
+          pipe.x -= 2;
+          ctx.fillRect(pipe.x, 0, 50, pipe.top);
+          ctx.fillRect(pipe.x, pipe.bottom, 50, 600 - pipe.bottom);
 
-          if (
-            100 + 20 > pipes[i].x &&
-            100 - 20 < pipes[i].x + 50 &&
-            (y - 20 < pipes[i].top || y + 20 > pipes[i].bottom)
-          ) {
-            gameOver();
-            return;
+          if (100 + 20 > pipe.x && 100 - 20 < pipe.x + 50 && (y - 20 < pipe.top || y + 20 > pipe.bottom)) {
+            return gameOver();
           }
         }
 
@@ -282,7 +269,6 @@
             score += 5;
             redDot.collected = true;
           }
-
           if (redDot.x < -10) redDot = null;
         }
 
@@ -294,9 +280,9 @@
 
       function gameOver() {
         clearInterval(scoreInterval);
+        window.removeEventListener('keydown', flap);
         saveScore(currentUser, score);
         alert('Game Over! You earned: ' + score + ' points');
-        window.removeEventListener('keydown', flap);
         showMenu();
       }
 
@@ -305,7 +291,6 @@
 
     showLogin();
   </script>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, push, set, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
@@ -314,7 +299,7 @@
       apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
       authDomain: "flappy-ball-2-leaderboard.firebaseapp.com",
       projectId: "flappy-ball-2-leaderboard",
-      storageBucket: "flappy-ball-2-leaderboard.firebasestorage.app",
+      storageBucket: "flappy-ball-2-leaderboard.appspot.com",
       messagingSenderId: "678584043682",
       appId: "1:678584043682:web:869514b82e6b4676c82ffb",
       measurementId: "G-6MDV8B1CCP",
