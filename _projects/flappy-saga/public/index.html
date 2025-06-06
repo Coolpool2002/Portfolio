@@ -3,146 +3,150 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account Management + Flappy Bird</title>
+  <title>Flappy Ball 2 - Menu</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       background-color: #1e1e1e;
-      color: #f5f5f5;
+      color: #fff;
       text-align: center;
       padding: 40px;
     }
     input, button {
-      margin: 5px;
-      padding: 10px;
+      margin: 6px;
+      padding: 10px 16px;
       font-size: 1rem;
+      cursor: pointer;
     }
-    #menu, #game, #loginView, #registerView, #userListView, #recordView {
+    #menu, #game, #loginView, #registerView, #userListView, #recordView,
+    #shopView, #customizeView, #backgroundsView, #skinsView {
       display: none;
+    }
+    .section {
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <!-- UI Views -->
-  <div id="loginView">
-    <h1>Login</h1>
-    <input type="text" id="loginUsername" placeholder="Username"><br>
-    <input type="password" id="loginPassword" placeholder="Password"><br>
-    <button id="loginButton">Login</button>
-    <p>Don't have an account? <a href="#" id="showRegisterLink">Register here</a></p>
-    <p><a href="#" id="guestLink">Sign in as Guest</a></p>
-  </div>
-
-  <div id="registerView">
-    <h1>Register</h1>
-    <input type="text" id="registerUsername" placeholder="Username"><br>
-    <input type="password" id="registerPassword" placeholder="Password"><br>
-    <button id="registerButton">Register</button>
-    <p>Already have an account? <a href="#" id="showLoginLink">Login</a></p>
-  </div>
-
   <div id="menu">
     <h1>Welcome, <span id="currentUser"></span></h1>
-    <button id="startGameButton">Play Flappy Ball 2</button>
-    <button id="manageUsersButton">Manage Users</button>
-    <button id="viewRecordsButton">View Records</button>
-    <button id="logoutButton">Logout</button>
-    <button id="shopButton">Shop</button>
+    <div class="section">
+      <button id="startGameButton">Play</button>
+      <button id="manageUsersButton">Manage Users</button>
+      <button id="viewRecordsButton">View Records</button>
+    </div>
+    <div class="section">
+      <button id="customizeButton">Customize</button>
+      <button id="shopButton">Shop</button>
+    </div>
+    <div class="section">
+      <button id="logoutButton">Logout</button>
+    </div>
   </div>
 
-<div id="shopView" style="display:none;">
-  <h2>Shop</h2>
-  <div id="pointsDisplay"></div>
-  <!-- Add your shop items/buttons for backgrounds/skins here -->
-  <button onclick="buyBackground('forest', 100)">Buy Forest Background (100 points)</button>
-  <button onclick="buyBackground('night', 200)">Buy Night Background (200 points)</button>
-  <!-- Add more items as needed -->
-  <button id="backFromShopButton">Back</button>
-</div>
-  
-  <div id="userListView">
-    <h2>All Users</h2>
-    <div id="userList"></div>
-    <button id="backFromUsersButton">Back</button>
+  <div id="shopView">
+    <h2>Shop</h2>
+    <p id="pointsDisplay">Points: 0</p>
+    <button onclick="buyBackground('forest', 100)">Buy Forest (100 pts)</button>
+    <button onclick="buyBackground('night', 200)">Buy Night (200 pts)</button>
+    <br><br>
+    <button id="backFromShopButton">Back</button>
   </div>
 
-  <div id="recordView">
-    <h2>All Scores</h2>
-    <div id="recordList"></div>
-    <button id="backFromRecordsButton">Back</button>
+  <div id="customizeView">
+    <h2>Customize</h2>
+    <button id="backgroundsButton">Backgrounds</button>
+    <button id="skinsButton">Skins</button>
+    <br><br>
+    <button id="backFromCustomizeButton">Back</button>
+  </div>
+
+  <div id="backgroundsView">
+    <h3>Choose Background</h3>
+    <button onclick="selectBackground('sky')">Sky</button>
+    <button onclick="selectBackground('forest')">Forest</button>
+    <button onclick="selectBackground('night')">Night</button>
+    <br><br>
+    <button id="backFromBackgroundsButton">Back</button>
+  </div>
+
+  <div id="skinsView">
+    <h3>Choose Skin</h3>
+    <button onclick="selectSkin('yellow')">Yellow</button>
+    <button onclick="selectSkin('blue')">Blue</button>
+    <button onclick="selectSkin('red')">Red</button>
+    <br><br>
+    <button id="backFromSkinsButton">Back</button>
   </div>
 
   <canvas id="game" width="400" height="600"></canvas>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, push, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    let selectedBackground = "sky";
+    let selectedSkin = "yellow";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
-      authDomain: "flappy-ball-2-leaderboard.firebaseapp.com",
-      projectId: "flappy-ball-2-leaderboard",
-      storageBucket: "flappy-ball-2-leaderboard.appspot.com",
-      messagingSenderId: "678584043682",
-      appId: "1:678584043682:web:869514b82e6b4676c82ffb",
-      measurementId: "G-6MDV8B1CCP",
-      databaseURL: "https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    window.saveScore = async (name, score) => {
-      try {
-        if (typeof name !== "string" || name.trim() === "") throw new Error("Invalid name");
-        if (typeof score !== "number" || isNaN(score) || score < 0) throw new Error("Invalid score");
-
-        const scoresRef = ref(db, "scores");
-        const newScoreRef = push(scoresRef);
-        await set(newScoreRef, {
-          name: name.trim(),
-          score,
-          timestamp: Date.now()
-        });
-      } catch (e) {
-        console.error("Failed to save score:", e);
+    function drawBackground(ctx) {
+      switch (selectedBackground) {
+        case "forest": ctx.fillStyle = "#228B22"; break;
+        case "night": ctx.fillStyle = "#0a0a40"; break;
+        default: ctx.fillStyle = "skyblue";
       }
-    };
-
-    window.loadTopScores = async () => {
-      try {
-        const scoresRef = ref(db, "scores");
-        const snapshot = await get(scoresRef);
-        if (!snapshot.exists()) return [];
-
-        const raw = snapshot.val();
-        const scores = Object.keys(raw).map(key => raw[key]);
-
-        const validScores = scores.filter(s =>
-          typeof s.score === "number" &&
-          typeof s.name === "string" &&
-          s.name.trim().length > 0
-        );
-
-        return validScores.sort((a, b) => b.score - a.score).slice(0, 10);
-      } catch (e) {
-        console.error("Failed to load scores:", e);
-        return [];
-      }
-    };
-
-    // Optional: Cleanup function to remove malformed entries
-    async function cleanBadScores() {
-      const snapshot = await get(ref(db, "scores"));
-      if (!snapshot.exists()) return;
-      const raw = snapshot.val();
-      for (let key in raw) {
-        const { name, score } = raw[key];
-        if (typeof name !== "string" || typeof score !== "number") {
-          await remove(ref(db, `scores/${key}`));
-        }
-      }
+      ctx.fillRect(0, 0, 400, 600);
     }
+
+    function selectBackground(type) {
+      selectedBackground = type;
+      alert("Background set to " + type);
+    }
+
+    function selectSkin(color) {
+      selectedSkin = color;
+      alert("Skin set to " + color);
+    }
+
+    document.getElementById("customizeButton").onclick = () => {
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("customizeView").style.display = "block";
+    };
+
+    document.getElementById("shopButton").onclick = () => {
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("shopView").style.display = "block";
+    };
+
+    document.getElementById("backgroundsButton").onclick = () => {
+      document.getElementById("customizeView").style.display = "none";
+      document.getElementById("backgroundsView").style.display = "block";
+    };
+
+    document.getElementById("skinsButton").onclick = () => {
+      document.getElementById("customizeView").style.display = "none";
+      document.getElementById("skinsView").style.display = "block";
+    };
+
+    document.getElementById("backFromCustomizeButton").onclick = () => {
+      document.getElementById("customizeView").style.display = "none";
+      document.getElementById("menu").style.display = "block";
+    };
+
+    document.getElementById("backFromBackgroundsButton").onclick = () => {
+      document.getElementById("backgroundsView").style.display = "none";
+      document.getElementById("customizeView").style.display = "block";
+    };
+
+    document.getElementById("backFromSkinsButton").onclick = () => {
+      document.getElementById("skinsView").style.display = "none";
+      document.getElementById("customizeView").style.display = "block";
+    };
+
+    document.getElementById("backFromShopButton").onclick = () => {
+      document.getElementById("shopView").style.display = "none";
+      document.getElementById("menu").style.display = "block";
+    };
+  </script>
+</body>
+</html>
+
 
     const users = { admin: "admin123" };
     let currentUser = null;
