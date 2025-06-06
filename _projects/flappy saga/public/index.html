@@ -63,9 +63,7 @@
   <canvas id="game" width="400" height="600"></canvas>
 
   <script>
-    const users = {
-      admin: "admin123"
-    };
+    const users = { admin: "admin123" };
     let currentUser = null;
     const loginView = document.getElementById('loginView');
     const registerView = document.getElementById('registerView');
@@ -148,13 +146,23 @@
     }
 
     async function showRecords() {
-      recordList.innerHTML = '';
-      const scores = await loadTopScores();
-      scores.forEach(r => {
-        const div = document.createElement('div');
-        div.textContent = `${r.name}: ${r.score} points`;
-        recordList.appendChild(div);
-      });
+      recordList.innerHTML = 'Loading...';
+      try {
+        const scores = await loadTopScores();
+        recordList.innerHTML = '';
+        if (scores.length === 0) {
+          recordList.innerHTML = 'No records found.';
+        } else {
+          scores.forEach(r => {
+            const div = document.createElement('div');
+            div.textContent = `${r.name}: ${r.score} points`;
+            recordList.appendChild(div);
+          });
+        }
+      } catch (error) {
+        recordList.innerHTML = 'Failed to load scores.';
+        console.error('Error loading scores:', error);
+      }
       menu.style.display = 'none';
       recordView.style.display = 'block';
     }
@@ -297,6 +305,7 @@
 
     showLogin();
   </script>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getDatabase, ref, push, set, get, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
