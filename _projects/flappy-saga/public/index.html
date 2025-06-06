@@ -95,17 +95,21 @@
     };
 
     window.loadTopScores = async () => {
-      try {
-        const scoresQuery = query(ref(db, "scores"), orderByChild("score"));
-        const snapshot = await get(scoresQuery);
-        if (!snapshot.exists()) return [];
-        const scores = Object.values(snapshot.val());
-        return scores.sort((a, b) => b.score - a.score).slice(0, 10);
-      } catch (e) {
-        console.error("Failed to load scores:", e);
-        return [];
-      }
-    };
+  try {
+    const scoresRef = ref(db, "scores");
+    const scoresQuery = query(scoresRef, orderByChild("score"));
+    const snapshot = await get(scoresQuery);
+    if (!snapshot.exists()) return [];
+    
+    const raw = snapshot.val();
+    const scores = Object.keys(raw).map(key => raw[key]);
+    return scores.sort((a, b) => b.score - a.score).slice(0, 10);
+  } catch (e) {
+    console.error("Failed to load scores:", e);
+    return [];
+  }
+};
+
 
     const users = { admin: "admin123" };
     let currentUser = null;
