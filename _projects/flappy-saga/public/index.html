@@ -97,18 +97,23 @@
     window.loadTopScores = async () => {
   try {
     const scoresRef = ref(db, "scores");
-    const scoresQuery = query(scoresRef, orderByChild("score"));
-    const snapshot = await get(scoresQuery);
+    const snapshot = await get(scoresRef);  // no query — load all
+
     if (!snapshot.exists()) return [];
-    
+
     const raw = snapshot.val();
     const scores = Object.keys(raw).map(key => raw[key]);
-    return scores.sort((a, b) => b.score - a.score).slice(0, 10);
+
+    // Filter out bad entries (missing score) to avoid crashes
+    const validScores = scores.filter(s => typeof s.score === "number");
+
+    return validScores.sort((a, b) => b.score - a.score).slice(0, 10);
   } catch (e) {
     console.error("Failed to load scores:", e);
     return [];
   }
 };
+
 
 
     const users = { admin: "admin123" };
