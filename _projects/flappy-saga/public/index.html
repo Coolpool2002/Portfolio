@@ -23,6 +23,7 @@
   </style>
 </head>
 <body>
+  <!-- UI Views -->
   <div id="loginView">
     <h1>Login</h1>
     <input type="text" id="loginUsername" placeholder="Username"><br>
@@ -64,7 +65,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, push, set, get, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, push, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
@@ -82,10 +83,13 @@
 
     window.saveScore = async (name, score) => {
       try {
+        if (typeof name !== "string" || name.trim() === "") throw new Error("Invalid name");
+        if (typeof score !== "number" || isNaN(score) || score < 0) throw new Error("Invalid score");
+
         const scoresRef = ref(db, "scores");
         const newScoreRef = push(scoresRef);
         await set(newScoreRef, {
-          name,
+          name: name.trim(),
           score,
           timestamp: Date.now()
         });
@@ -95,26 +99,39 @@
     };
 
     window.loadTopScores = async () => {
-  try {
-    const scoresRef = ref(db, "scores");
-    const snapshot = await get(scoresRef);  // no query — load all
+      try {
+        const scoresRef = ref(db, "scores");
+        const snapshot = await get(scoresRef);
+        if (!snapshot.exists()) return [];
 
-    if (!snapshot.exists()) return [];
+        const raw = snapshot.val();
+        const scores = Object.keys(raw).map(key => raw[key]);
 
-    const raw = snapshot.val();
-    const scores = Object.keys(raw).map(key => raw[key]);
+        const validScores = scores.filter(s =>
+          typeof s.score === "number" &&
+          typeof s.name === "string" &&
+          s.name.trim().length > 0
+        );
 
-    // Filter out bad entries (missing score) to avoid crashes
-    const validScores = scores.filter(s => typeof s.score === "number");
+        return validScores.sort((a, b) => b.score - a.score).slice(0, 10);
+      } catch (e) {
+        console.error("Failed to load scores:", e);
+        return [];
+      }
+    };
 
-    return validScores.sort((a, b) => b.score - a.score).slice(0, 10);
-  } catch (e) {
-    console.error("Failed to load scores:", e);
-    return [];
-  }
-};
-
-
+    // Optional: Cleanup function to remove malformed entries
+    async function cleanBadScores() {
+      const snapshot = await get(ref(db, "scores"));
+      if (!snapshot.exists()) return;
+      const raw = snapshot.val();
+      for (let key in raw) {
+        const { name, score } = raw[key];
+        if (typeof name !== "string" || typeof score !== "number") {
+          await remove(ref(db, `scores/${key}`));
+        }
+      }
+    }
 
     const users = { admin: "admin123" };
     let currentUser = null;
@@ -238,7 +255,7 @@
     function deleteUser(username) {
       if (currentUser !== "admin") return alert("Only admin can delete users.");
       if (username === "admin") return;
-      if (confirm(`Are you sure you want to delete '${username}'?`)) {
+      if (confirm(`Delete '${username}'?`)) {
         delete users[username];
         showUsers();
       }
@@ -278,11 +295,10 @@
       let frame = 0;
       let redDot = null;
 
-      function flap() {
-        velocity = flapStrength;
-      }
-
+      const flap = () => { velocity = flapStrength; };
+      window.removeEventListener("keydown", flap);
       window.addEventListener("keydown", flap);
+
       const scoreInterval = setInterval(() => score++, 1000);
 
       function draw() {
