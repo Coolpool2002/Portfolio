@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=400, initial-scale=1.0">
   <title>Flappy Ball 2 - Menu</title>
   <style>
     body {
@@ -28,6 +28,26 @@
   </style>
 </head>
 <body>
+  <!-- Login View -->
+  <div id="loginView">
+    <h2>Login</h2>
+    <input id="loginUsername" placeholder="Username"><br>
+    <input id="loginPassword" type="password" placeholder="Password"><br>
+    <button id="loginButton">Login</button>
+    <br>
+    <a href="#" id="showRegisterLink">Register</a> | 
+    <a href="#" id="guestLink">Continue as Guest</a>
+  </div>
+  <!-- Register View -->
+  <div id="registerView">
+    <h2>Register</h2>
+    <input id="registerUsername" placeholder="Username"><br>
+    <input id="registerPassword" type="password" placeholder="Password"><br>
+    <button id="registerButton">Register</button>
+    <br>
+    <a href="#" id="showLoginLink">Back to Login</a>
+  </div>
+  <!-- Main Menu -->
   <div id="menu">
     <h1>Welcome, <span id="currentUser"></span></h1>
     <div class="section">
@@ -43,7 +63,7 @@
       <button id="logoutButton">Logout</button>
     </div>
   </div>
-
+  <!-- Shop View -->
   <div id="shopView">
     <h2>Shop</h2>
     <p id="pointsDisplay">Points: 0</p>
@@ -52,7 +72,7 @@
     <br><br>
     <button id="backFromShopButton">Back</button>
   </div>
-
+  <!-- Customize View -->
   <div id="customizeView">
     <h2>Customize</h2>
     <button id="backgroundsButton">Backgrounds</button>
@@ -60,7 +80,7 @@
     <br><br>
     <button id="backFromCustomizeButton">Back</button>
   </div>
-
+  <!-- Backgrounds View -->
   <div id="backgroundsView">
     <h3>Choose Background</h3>
     <button onclick="selectBackground('sky')">Sky</button>
@@ -69,7 +89,7 @@
     <br><br>
     <button id="backFromBackgroundsButton">Back</button>
   </div>
-
+  <!-- Skins View -->
   <div id="skinsView">
     <h3>Choose Skin</h3>
     <button onclick="selectSkin('yellow')">Yellow</button>
@@ -78,79 +98,27 @@
     <br><br>
     <button id="backFromSkinsButton">Back</button>
   </div>
-
+  <!-- User List View -->
+  <div id="userListView">
+    <h2>User List</h2>
+    <div id="userList"></div>
+    <button id="backFromUsersButton">Back</button>
+  </div>
+  <!-- Record View -->
+  <div id="recordView">
+    <h2>Records</h2>
+    <div id="recordList"></div>
+    <button id="backFromRecordsButton">Back</button>
+  </div>
+  <!-- Game Canvas -->
   <canvas id="game" width="400" height="600"></canvas>
-
   <script type="module">
-    let selectedBackground = "sky";
-    let selectedSkin = "yellow";
-
-    function drawBackground(ctx) {
-      switch (selectedBackground) {
-        case "forest": ctx.fillStyle = "#228B22"; break;
-        case "night": ctx.fillStyle = "#0a0a40"; break;
-        default: ctx.fillStyle = "skyblue";
-      }
-      ctx.fillRect(0, 0, 400, 600);
-    }
-
-    function selectBackground(type) {
-      selectedBackground = type;
-      alert("Background set to " + type);
-    }
-
-    function selectSkin(color) {
-      selectedSkin = color;
-      alert("Skin set to " + color);
-    }
-
-    document.getElementById("customizeButton").onclick = () => {
-      document.getElementById("menu").style.display = "none";
-      document.getElementById("customizeView").style.display = "block";
-    };
-
-    document.getElementById("shopButton").onclick = () => {
-      document.getElementById("menu").style.display = "none";
-      document.getElementById("shopView").style.display = "block";
-    };
-
-    document.getElementById("backgroundsButton").onclick = () => {
-      document.getElementById("customizeView").style.display = "none";
-      document.getElementById("backgroundsView").style.display = "block";
-    };
-
-    document.getElementById("skinsButton").onclick = () => {
-      document.getElementById("customizeView").style.display = "none";
-      document.getElementById("skinsView").style.display = "block";
-    };
-
-    document.getElementById("backFromCustomizeButton").onclick = () => {
-      document.getElementById("customizeView").style.display = "none";
-      document.getElementById("menu").style.display = "block";
-    };
-
-    document.getElementById("backFromBackgroundsButton").onclick = () => {
-      document.getElementById("backgroundsView").style.display = "none";
-      document.getElementById("customizeView").style.display = "block";
-    };
-
-    document.getElementById("backFromSkinsButton").onclick = () => {
-      document.getElementById("skinsView").style.display = "none";
-      document.getElementById("customizeView").style.display = "block";
-    };
-
-    document.getElementById("backFromShopButton").onclick = () => {
-      document.getElementById("shopView").style.display = "none";
-      document.getElementById("menu").style.display = "block";
-    };
-  </script>
-</body>
-</html>
-
-
+    // User management
     const users = { admin: "admin123" };
     let currentUser = null;
+    let userPoints = {}; // Keep points per user
 
+    // Views
     const loginView = document.getElementById("loginView");
     const registerView = document.getElementById("registerView");
     const menu = document.getElementById("menu");
@@ -161,34 +129,35 @@
     const recordView = document.getElementById("recordView");
     const recordList = document.getElementById("recordList");
 
+    // Hide all views
+    function hideAllViews() {
+      loginView.style.display = "none";
+      registerView.style.display = "none";
+      menu.style.display = "none";
+      userListView.style.display = "none";
+      recordView.style.display = "none";
+      gameCanvas.style.display = "none";
+      document.getElementById("shopView").style.display = "none";
+      document.getElementById("customizeView").style.display = "none";
+      document.getElementById("backgroundsView").style.display = "none";
+      document.getElementById("skinsView").style.display = "none";
+    }
+
     function showLogin() {
+      hideAllViews();
       loginView.style.display = "block";
-      registerView.style.display = "none";
-      menu.style.display = "none";
-      gameCanvas.style.display = "none";
-      userListView.style.display = "none";
-      recordView.style.display = "none";
     }
-
     function showRegister() {
-      loginView.style.display = "none";
+      hideAllViews();
       registerView.style.display = "block";
-      menu.style.display = "none";
-      gameCanvas.style.display = "none";
-      userListView.style.display = "none";
-      recordView.style.display = "none";
     }
-
     function showMenu() {
+      hideAllViews();
       document.getElementById("currentUser").textContent = currentUser || "Guest";
-      loginView.style.display = "none";
-      registerView.style.display = "none";
       menu.style.display = "block";
-      gameCanvas.style.display = "none";
-      userListView.style.display = "none";
-      recordView.style.display = "none";
     }
 
+    // Login/Register logic
     document.getElementById("loginButton").onclick = () => {
       const user = document.getElementById("loginUsername").value;
       const pass = document.getElementById("loginPassword").value;
@@ -199,7 +168,6 @@
         alert("Incorrect login.");
       }
     };
-
     document.getElementById("registerButton").onclick = () => {
       const user = document.getElementById("registerUsername").value;
       const pass = document.getElementById("registerPassword").value;
@@ -211,48 +179,74 @@
         alert("Invalid input or user exists.");
       }
     };
-
     document.getElementById("guestLink").onclick = (e) => {
       e.preventDefault();
       currentUser = "Guest";
       showMenu();
     };
-
     document.getElementById("showRegisterLink").onclick = (e) => {
       e.preventDefault();
       showRegister();
     };
-
     document.getElementById("showLoginLink").onclick = (e) => {
       e.preventDefault();
       showLogin();
     };
-
     document.getElementById("logoutButton").onclick = () => {
       currentUser = null;
       showLogin();
     };
 
+    // Main menu
     document.getElementById("startGameButton").onclick = () => startGame();
     document.getElementById("manageUsersButton").onclick = () => showUsers();
     document.getElementById("viewRecordsButton").onclick = () => showRecords();
     document.getElementById("backFromUsersButton").onclick = () => showMenu();
     document.getElementById("backFromRecordsButton").onclick = () => showMenu();
 
+    // SHOP & CUSTOMIZE
+    document.getElementById("customizeButton").onclick = () => {
+      hideAllViews();
+      document.getElementById("customizeView").style.display = "block";
+    };
+    document.getElementById("shopButton").onclick = () => {
+      hideAllViews();
+      document.getElementById("shopView").style.display = "block";
+      updatePointsDisplay();
+    };
+    document.getElementById("backgroundsButton").onclick = () => {
+      hideAllViews();
+      document.getElementById("backgroundsView").style.display = "block";
+    };
+    document.getElementById("skinsButton").onclick = () => {
+      hideAllViews();
+      document.getElementById("skinsView").style.display = "block";
+    };
+    document.getElementById("backFromCustomizeButton").onclick = () => showMenu();
+    document.getElementById("backFromBackgroundsButton").onclick = () => {
+      hideAllViews();
+      document.getElementById("customizeView").style.display = "block";
+    };
+    document.getElementById("backFromSkinsButton").onclick = () => {
+      hideAllViews();
+      document.getElementById("customizeView").style.display = "block";
+    };
+    document.getElementById("backFromShopButton").onclick = () => showMenu();
+
+    // User List
     function showUsers() {
+      hideAllViews();
       userList.innerHTML = "";
       Object.keys(users).forEach(user => {
         const div = document.createElement("div");
         div.style.textAlign = "center";
         div.style.marginBottom = "10px";
-
         const span = document.createElement("span");
         span.textContent = user;
         span.style.display = "inline-block";
         span.style.width = "200px";
         span.style.color = "white";
         div.appendChild(span);
-
         if (currentUser === "admin") {
           const delBtn = document.createElement("button");
           delBtn.textContent = "Delete";
@@ -260,13 +254,10 @@
           delBtn.addEventListener("click", () => deleteUser(user));
           div.appendChild(delBtn);
         }
-
         userList.appendChild(div);
       });
-      menu.style.display = "none";
       userListView.style.display = "block";
     }
-
     function deleteUser(username) {
       if (currentUser !== "admin") return alert("Only admin can delete users.");
       if (username === "admin") return;
@@ -276,8 +267,13 @@
       }
     }
 
+    // Records (dummy)
+    window.loadTopScores = async () => [
+      { name: "admin", score: 42 },
+      { name: "Guest", score: 12 }
+    ];
     async function showRecords() {
-      menu.style.display = "none";
+      hideAllViews();
       recordView.style.display = "block";
       recordList.innerHTML = "Loading...";
       const scores = await window.loadTopScores();
@@ -293,8 +289,44 @@
       }
     }
 
+    // Game + Customization
+    let selectedBackground = "sky";
+    let selectedSkin = "yellow";
+    function selectBackground(type) {
+      selectedBackground = type;
+      alert("Background set to " + type);
+    }
+    function selectSkin(color) {
+      selectedSkin = color;
+      alert("Skin set to " + color);
+    }
+
+    // Shop logic
+    function updatePointsDisplay() {
+      document.getElementById("pointsDisplay").innerText = 
+        "Points: " + (userPoints[currentUser] || 0);
+    }
+    window.buyBackground = function(type, cost) {
+      if (!userPoints[currentUser] || userPoints[currentUser] < cost) {
+        alert("Not enough points!");
+        return;
+      }
+      userPoints[currentUser] -= cost;
+      alert("You bought the " + type + " background!");
+      updatePointsDisplay();
+    };
+
+    // Game logic
+    function updateUserPoints(points) {
+      if (!userPoints[currentUser]) userPoints[currentUser] = 0;
+      userPoints[currentUser] += points;
+    }
+    window.saveScore = function(user, score) {
+      // Dummy: In a real app, this would save to a server/localStorage
+    };
+
     function startGame() {
-      menu.style.display = "none";
+      hideAllViews();
       gameCanvas.style.display = "block";
       runGame();
     }
@@ -309,35 +341,41 @@
       const gap = 150;
       let frame = 0;
       let redDot = null;
-
       const flap = () => { velocity = flapStrength; };
       window.removeEventListener("keydown", flap);
       window.addEventListener("keydown", flap);
-
       const scoreInterval = setInterval(() => score++, 1000);
+
+      function drawBackground(ctx) {
+        switch (selectedBackground) {
+          case "forest": ctx.fillStyle = "#228B22"; break;
+          case "night": ctx.fillStyle = "#0a0a40"; break;
+          default: ctx.fillStyle = "skyblue";
+        }
+        ctx.fillRect(0, 0, 400, 600);
+      }
 
       function draw() {
         frame++;
         ctx.clearRect(0, 0, 400, 600);
-        ctx.fillStyle = "skyblue";
-        ctx.fillRect(0, 0, 400, 600);
+        drawBackground(ctx);
 
-        ctx.fillStyle = "yellow";
+        // Ball (skin color)
+        ctx.fillStyle = selectedSkin;
         ctx.beginPath();
         ctx.arc(100, y, 20, 0, Math.PI * 2);
         ctx.fill();
 
         velocity += gravity;
         y += velocity;
-
         if (y > 580 || y < 0) return gameOver();
 
+        // Pipes
         if (frame % 90 === 0) {
           const topHeight = Math.floor(Math.random() * 200) + 50;
           pipes.push({ x: 400, top: topHeight, bottom: topHeight + gap });
           if (pipes.length % 10 === 0) redDot = { x: 425, y: topHeight + gap / 2, collected: false };
         }
-
         ctx.fillStyle = "green";
         for (let pipe of pipes) {
           pipe.x -= 2;
@@ -351,6 +389,7 @@
           ) return gameOver();
         }
 
+        // Red dot
         if (redDot && !redDot.collected) {
           redDot.x -= 2;
           ctx.fillStyle = "red";
@@ -365,24 +404,26 @@
           if (redDot.x < -10) redDot = null;
         }
 
+        // Score
         ctx.fillStyle = "black";
         ctx.font = "16px Arial";
         ctx.fillText("SCORE: " + score + " points", 10, 20);
         requestAnimationFrame(draw);
       }
 
-     function gameOver() {
-  clearInterval(scoreInterval);
-  window.removeEventListener("keydown", flap);
-  window.saveScore(currentUser, score);
-  updateUserPoints(score); // <-- ADD THIS
-  alert("Game Over! You earned: " + score + " points");
-  showMenu();
-}
+      function gameOver() {
+        clearInterval(scoreInterval);
+        window.removeEventListener("keydown", flap);
+        window.saveScore(currentUser, score);
+        updateUserPoints(score);
+        alert("Game Over! You earned: " + score + " points");
+        showMenu();
+      }
 
       draw();
     }
 
+    // Boot
     showLogin();
   </script>
 </body>
