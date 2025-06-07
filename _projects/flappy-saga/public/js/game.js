@@ -1,6 +1,6 @@
 import { updateUserPoints } from "./shop.js";
 import { saveScore, updateHighScore, incrementGamesPlayed, getUserStats } from "./firebase.js";
-import { getCurrentUser } from "./main.js";
+import { getCurrentUser } from "./main.js";  // function now
 import { showMenu } from "./ui.js";
 
 const gameCanvas = document.getElementById("game");
@@ -105,7 +105,8 @@ function runGame() {
     window.removeEventListener("keydown", flap);
     flapListenerAdded = false;
 
-    const user = getCurrentUser();
+    const user = getCurrentUser();  // call as function
+
     try {
       await saveScore(user, score);
       updateUserPoints(score);

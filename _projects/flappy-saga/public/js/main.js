@@ -205,6 +205,10 @@ if (savedUser) {
   showLogin();
 }
 
+export function getCurrentUser() {
+  return currentUser;
+}
+
 export {
   getDatabase,
   ref,
@@ -213,6 +217,5 @@ export {
   get,
   remove,
   updateUserPoints,
-  currentUser as getCurrentUser,
   loadTopScores,
 };
