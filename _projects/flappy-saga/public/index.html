@@ -250,36 +250,34 @@
       });
       menu.style.display = "none";
       userListView.style.display = "block";
-    }
+    }function deleteUser(username) {
+  if (currentUser !== "admin") return alert("Only admin can delete users.");
+  if (username === "admin") return;
+  if (confirm(`Delete '${username}'?`)) {
+    delete users[username];
+    showUsers();
+  }
+}
 
-    function deleteUser(username) {
-      if (currentUser !== "admin") return alert("Only admin can delete users.");
-      if (username === "admin") return;
-      if (confirm(`Delete '${username}'?`)) {
-        delete users[username];
-        showUsers();
-      }
-    }
+// Show scores in record view
+async function showRecords() {
+  menu.style.display = "none";
+  recordView.style.display = "block";
+  recordList.innerHTML = "Loading...";
+  const scores = await window.loadTopScores();
+  recordList.innerHTML = "";
+  if (scores.length === 0) {
+    recordList.innerHTML = "No records found.";
+  } else {
+    scores.forEach(r => {
+      const div = document.createElement("div");
+      div.textContent = `${r.name}: ${r.score} points`;
+      recordList.appendChild(div);
+    });
+  }
+}
 
-<<<<<<< HEAD
-    async function showRecords() {
-      menu.style.display = "none";
-      recordView.style.display = "block";
-      recordList.innerHTML = "Loading...";
-      const scores = await window.loadTopScores();
-      recordList.innerHTML = "";
-      if (scores.length === 0) {
-        recordList.innerHTML = "No records found.";
-      } else {
-        scores.forEach(r => {
-          const div = document.createElement("div");
-          div.textContent = `${r.name}: ${r.score} points`;
-          recordList.appendChild(div);
-        });
-      }
-    }
-=======
-// Records (Firebase dynamic)
+// Fetch scores from Firebase
 window.loadTopScores = async () => {
   const res = await fetch('https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app/scores.json');
   const data = await res.json();
