@@ -19,47 +19,60 @@ export function getUserPoints() {
   return userPoints[user] || 0;
 }
 
-// Buy a background with point deduction
-export function buyBackground(name, cost) {
+// Get any user's points (for external UI display)
+export function getPointsForUser(user) {
+  return userPoints[user] || 0;
+}
+
+// Internal: purchase and feedback logic
+function purchaseItem(name, cost, onSuccess) {
   const user = getCurrentUser();
   const currentPoints = userPoints[user] || 0;
 
   if (currentPoints >= cost) {
     userPoints[user] -= cost;
     updatePointsDisplay(userPoints[user]);
-    alert(`${name} background purchased!`);
-    
-    // Example: apply background change
-    // document.body.style.backgroundImage = `url('images/${name}.jpg')`;
+    alert(`${name} purchased!`);
+    if (onSuccess) onSuccess();
   } else {
     alert("Not enough points.");
   }
 }
 
-// Set up shop buttons and view logic
+// Set up shop buttons and logic
 export function initShopView() {
   const shopBtn = document.getElementById("shopButton");
-  const backFromShopBtn = document.getElementById("backFromShopButton");
+  const shopView = document.getElementById("shopView");
+  const menu = document.getElementById("menu");
+  const backBtn = document.getElementById("backFromShopButton");
 
-  shopBtn.onclick = () => {
-    document.getElementById("menu").style.display = "none";
-    document.getElementById("shopView").style.display = "block";
-  };
+  const buyForestBtn = document.getElementById("buyForestBtn");
+  const buyNightBtn = document.getElementById("buyNightBtn");
 
-  backFromShopBtn.onclick = () => {
-    document.getElementById("shopView").style.display = "none";
-    document.getElementById("menu").style.display = "block";
-  };
+  if (shopBtn && shopView && menu && backBtn) {
+    shopBtn.onclick = () => {
+      menu.style.display = "none";
+      shopView.style.display = "block";
+    };
+    backBtn.onclick = () => {
+      shopView.style.display = "none";
+      menu.style.display = "block";
+    };
+  }
 
-  const shopItems = [
-    { id: "buyForestBtn", name: "forest", cost: 100 },
-    { id: "buyNightBtn", name: "night", cost: 200 }
-  ];
+  if (buyForestBtn) {
+    buyForestBtn.onclick = () =>
+      purchaseItem("Forest Background", 100, () => {
+        // Apply background logic here (optional)
+        // document.body.style.backgroundImage = "url('images/forest.jpg')";
+      });
+  }
 
-  shopItems.forEach(({ id, name, cost }) => {
-    const btn = document.getElementById(id);
-    if (btn) {
-      btn.onclick = () => buyBackground(name, cost);
-    }
-  });
+  if (buyNightBtn) {
+    buyNightBtn.onclick = () =>
+      purchaseItem("Night Background", 200, () => {
+        // Apply background logic here (optional)
+        // document.body.style.backgroundImage = "url('images/night.jpg')";
+      });
+  }
 }

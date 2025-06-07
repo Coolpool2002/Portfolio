@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Account Management + Flappy Ball 2</title>
+  <title>Account Management + Flappy Bird</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,18 +43,18 @@
     <p>Already have an account? <a href="#" id="showLoginLink">Login</a></p>
   </div>
 
-  <!-- Menu View -->
+  <!-- Main Menu -->
   <div id="menu">
     <h1>Welcome, <span id="currentUser"></span></h1>
     <div id="pointsDisplay"></div>
     <button id="startGameButton">Play Flappy Ball 2</button>
     <button id="manageUsersButton">Manage Users</button>
     <button id="viewRecordsButton">View Records</button>
-    <button id="shopButton">Shop</button>
     <button id="logoutButton">Logout</button>
+    <button id="shopButton">Shop</button>
   </div>
 
-  <!-- Shop View -->
+  <!-- Shop -->
   <div id="shopView">
     <h2>Shop</h2>
     <div id="pointsDisplay"></div>
@@ -63,24 +63,24 @@
     <button id="backFromShopButton">Back</button>
   </div>
 
-  <!-- User List View -->
+  <!-- User List -->
   <div id="userListView">
     <h2>All Users</h2>
     <div id="userList"></div>
     <button id="backFromUsersButton">Back</button>
   </div>
 
-  <!-- Record View -->
+  <!-- Records -->
   <div id="recordView">
     <h2>All Scores</h2>
     <div id="recordList"></div>
     <button id="backFromRecordsButton">Back</button>
   </div>
 
-  <!-- Game Canvas -->
+  <!-- Game -->
   <canvas id="game" width="400" height="600"></canvas>
 
-  <!-- Load entry module -->
+  <!-- Load Main JS -->
   <script type="module" src="js/main.js"></script>
 
 </body>
