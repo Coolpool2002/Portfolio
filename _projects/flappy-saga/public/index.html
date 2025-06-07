@@ -293,24 +293,6 @@ window.loadTopScores = async () => {
     .slice(0, 10);
 };
 
-async function showRecords() {
-  hideAllViews();
-  recordView.style.display = "block";
-  recordList.innerHTML = "Loading...";
-  const scores = await window.loadTopScores();
-  recordList.innerHTML = "";
-  if (scores.length === 0) {
-    recordList.innerHTML = "No records found.";
-  } else {
-    scores.forEach(r => {
-      const div = document.createElement("div");
-      div.textContent = `${r.name}: ${r.score} points`;
-      recordList.appendChild(div);
-    });
-  }
-}
-
->>>>>>> ca154595117fbf281d4e83435c1feb25e0ab4138
 
     function startGame() {
       menu.style.display = "none";
