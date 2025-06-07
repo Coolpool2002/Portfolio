@@ -1,7 +1,12 @@
-// == firebase.js ==
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set, get, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  set,
+  get,
+  update,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
@@ -11,73 +16,72 @@ const firebaseConfig = {
   messagingSenderId: "678584043682",
   appId: "1:678584043682:web:869514b82e6b4676c82ffb",
   measurementId: "G-6MDV8B1CCP",
-  databaseURL: "https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app"
+  databaseURL: "https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app",
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Save score to the scores list
 export async function saveScore(name, score) {
+  if (!name || typeof score !== "number") return;
   try {
-    if (typeof name !== "string" || name.trim() === "") throw new Error("Invalid name");
-    if (typeof score !== "number" || isNaN(score) || score < 0) throw new Error("Invalid score");
-
     const scoresRef = ref(db, "scores");
-    const newScoreRef = push(scoresRef);
-    await set(newScoreRef, {
-      name: name.trim(),
+    await push(scoresRef, {
+      name,
       score,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
+
+    // Update high score if it's greater than current
+    const userRef = ref(db, `users/${name}`);
+    const snapshot = await get(userRef);
+    const userData = snapshot.exists() ? snapshot.val() : {};
+    const currentBest = userData.highScore || 0;
+
+    if (score > currentBest) {
+      await update(userRef, { highScore: score });
+    }
+
   } catch (e) {
-    console.error("Failed to save score:", e);
+    console.error("Error saving score:", e);
   }
 }
 
+// Load top 10 high scores (best score per user)
 export async function loadTopScores() {
   try {
-    const scoresRef = ref(db, "scores");
+    const scoresRef = ref(db, "users");
     const snapshot = await get(scoresRef);
     if (!snapshot.exists()) return [];
 
-    const raw = snapshot.val();
-    const scores = Object.keys(raw).map(key => raw[key]);
+    const users = snapshot.val();
+    const entries = Object.entries(users)
+      .filter(([_, u]) => typeof u.highScore === "number")
+      .map(([name, u]) => ({ name, score: u.highScore }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 10);
 
-    const validScores = scores.filter(s =>
-      typeof s.score === "number" &&
-      typeof s.name === "string" &&
-      s.name.trim().length > 0
-    );
-
-    return validScores.sort((a, b) => b.score - a.score).slice(0, 10);
+    return entries;
   } catch (e) {
-    console.error("Failed to load scores:", e);
+    console.error("Error loading scores:", e);
     return [];
   }
 }
 
-export async function showRecords() {
-  const recordView = document.getElementById("recordView");
-  const recordList = document.getElementById("recordList");
-
-  recordView.style.display = "block";
-  recordList.innerHTML = "Loading...";
-
+// Increment games played
+export async function incrementGamesPlayed(username) {
+  if (!username) return;
   try {
-    const scores = await loadTopScores();
-    recordList.innerHTML = "";
-
-    if (scores.length === 0) {
-      recordList.innerHTML = "No records found.";
-    } else {
-      scores.forEach(r => {
-        const div = document.createElement("div");
-        div.textContent = `${r.name}: ${r.score} points`;
-        recordList.appendChild(div);
-      });
-    }
+    const userRef = ref(db, `users/${username}`);
+    const snapshot = await get(userRef);
+    const data = snapshot.val() || {};
+    const currentCount = data.gamesPlayed || 0;
+    await set(userRef, {
+      ...data,
+      gamesPlayed: currentCount + 1,
+    });
   } catch (e) {
-    console.error("Error loading records:", e);
-    recordList.innerHTML = "Failed to load records.";
+    console.error("Error incrementing games played:", e);
   }
 }
