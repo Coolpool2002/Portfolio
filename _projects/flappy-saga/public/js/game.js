@@ -1,8 +1,8 @@
 // == game.js ==
 
 import { updateUserPoints } from "./shop.js";
-import { saveScore } from "./firebase.js";
-import { getCurrentUser } from "./auth.js";
+import { saveScore, updateHighScore, incrementGamesPlayed, getUserStats } from "./firebase.js";
+import { getCurrentUser } from "./main.js";
 import { showMenu, updatePointsDisplay } from "./ui.js";
 
 const gameCanvas = document.getElementById("game");
@@ -11,20 +11,14 @@ const ctx = gameCanvas.getContext("2d");
 let flapListenerAdded = false;
 
 export function startGame() {
-  // Hide all other views
   const views = ["loginView", "registerView", "menu", "userListView", "recordView", "shopView"];
   for (const id of views) {
     const el = document.getElementById(id);
     if (el) el.style.display = "none";
   }
-
-  // Show canvas
   gameCanvas.style.display = "block";
-
-  // Clear the canvas before starting
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-
-  runGame(); // Start game logic
+  runGame();
 }
 
 function runGame() {
@@ -38,11 +32,9 @@ function runGame() {
   let frame = 0;
   let redDot = null;
   let gameEnded = false;
+  let isNewHigh = false;
 
-  const flap = () => {
-    velocity = flapStrength;
-  };
-
+  const flap = () => { velocity = flapStrength; };
   if (!flapListenerAdded) {
     window.addEventListener("keydown", flap);
     flapListenerAdded = true;
@@ -58,7 +50,6 @@ function runGame() {
     ctx.fillStyle = "skyblue";
     ctx.fillRect(0, 0, 400, 600);
 
-    // Draw player
     ctx.fillStyle = "yellow";
     ctx.beginPath();
     ctx.arc(100, y, 20, 0, Math.PI * 2);
@@ -66,21 +57,16 @@ function runGame() {
 
     velocity += gravity;
     y += velocity;
-
     if (y > 580 || y < 0) return endGame();
 
-    // Pipe generation
     if (frame % 90 === 0) {
       const topHeight = Math.floor(Math.random() * 200) + 50;
       pipes.push({ x: 400, top: topHeight, bottom: topHeight + gap });
-
-      // Spawn red dot every 10 pipes
       if (pipes.length % 10 === 0) {
         redDot = { x: 425, y: topHeight + gap / 2, collected: false };
       }
     }
 
-    // Draw pipes and check collisions
     ctx.fillStyle = "green";
     for (let pipe of pipes) {
       pipe.x -= 2;
@@ -91,11 +77,9 @@ function runGame() {
         100 + 20 > pipe.x &&
         100 - 20 < pipe.x + 50 &&
         (y - 20 < pipe.top || y + 20 > pipe.bottom);
-
       if (hitPipe) return endGame();
     }
 
-    // Red dot logic
     if (redDot && !redDot.collected) {
       redDot.x -= 2;
       ctx.fillStyle = "red";
@@ -107,35 +91,41 @@ function runGame() {
         score += 5;
         redDot.collected = true;
       }
-
       if (redDot.x < -10) redDot = null;
     }
 
-    // Score display
     ctx.fillStyle = "black";
     ctx.font = "16px Arial";
     ctx.fillText("SCORE: " + score + " points", 10, 20);
-
     requestAnimationFrame(draw);
   }
 
-  function endGame() {
+  async function endGame() {
     if (gameEnded) return;
     gameEnded = true;
-
     clearInterval(scoreInterval);
     window.removeEventListener("keydown", flap);
     flapListenerAdded = false;
 
+    const user = getCurrentUser();
     try {
-      saveScore(getCurrentUser(), score);
+      await saveScore(user, score);
       updateUserPoints(score);
+      await incrementGamesPlayed(user);
+
+      const stats = await getUserStats(user);
+      if (!stats.highScore || score > stats.highScore) {
+        await updateHighScore(user, score);
+        isNewHigh = true;
+      }
     } catch (e) {
-      console.error("Error during game over:", e);
+      console.error("Error on endGame:", e);
     }
 
-    alert("Game Over! You earned: " + score + " points");
-    showMenu();
+    setTimeout(() => {
+      alert(`Game Over! You earned: ${score} points` + (isNewHigh ? "\nNew High Score! 🎉" : ""));
+      showMenu();
+    }, 100);
   }
 
   draw();
