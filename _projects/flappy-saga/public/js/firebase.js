@@ -1,6 +1,28 @@
-import { getDatabase, ref, push, set, get, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  set,
+  get,
+  update,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const db = getDatabase();
+const firebaseConfig = {
+  apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
+  authDomain: "flappy-ball-2-leaderboard.firebaseapp.com",
+  projectId: "flappy-ball-2-leaderboard",
+  storageBucket: "flappy-ball-2-leaderboard.appspot.com",
+  messagingSenderId: "678584043682",
+  appId: "1:678584043682:web:869514b82e6b4676c82ffb",
+  measurementId: "G-6MDV8B1CCP",
+  databaseURL:
+    "https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app",
+};
+
+// Initialize Firebase App
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 // Save a new score to the leaderboard
 async function saveScore(name, score) {
@@ -11,7 +33,7 @@ async function saveScore(name, score) {
     await set(newScoreRef, {
       name,
       score,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   } catch (e) {
     console.error("Failed to save score:", e);
@@ -96,5 +118,5 @@ export {
   loadTopScores,
   incrementGamesPlayed,
   updateHighScore,
-  getUserStats
+  getUserStats,
 };
