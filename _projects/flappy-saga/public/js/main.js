@@ -65,7 +65,8 @@ function showRegister() {
 }
 
 async function showMenu() {
-  // Ensure currentUser is always respected here
+  currentUser = localStorage.getItem("flappyUser") || null; // Sync from localStorage
+
   document.getElementById("currentUser").textContent = currentUser || "Guest";
 
   loginView.style.display = "none";
@@ -122,7 +123,7 @@ loginBtn.onclick = async () => {
   const data = snapshot.val();
   if (data.password === pass) {
     localStorage.setItem("flappyUser", user);
-    currentUser = user;  // set currentUser here and keep it
+    currentUser = user;
     showMenu();
   } else {
     alert("Incorrect password.");
@@ -132,13 +133,13 @@ loginBtn.onclick = async () => {
 document.getElementById("guestLink").onclick = (e) => {
   e.preventDefault();
   localStorage.setItem("flappyUser", "Guest");
-  currentUser = "Guest";  // set currentUser explicitly
+  currentUser = "Guest";
   showMenu();
 };
 
 document.getElementById("logoutButton").onclick = () => {
   localStorage.removeItem("flappyUser");
-  currentUser = null;  // clear currentUser on logout
+  currentUser = null;
   showLogin();
 };
 
@@ -202,7 +203,7 @@ async function showRecords() {
   }
 }
 
-// On page load, restore user from localStorage
+// On page load
 const savedUser = localStorage.getItem("flappyUser");
 if (savedUser) {
   currentUser = savedUser;
@@ -211,7 +212,6 @@ if (savedUser) {
   showLogin();
 }
 
-// Export getCurrentUser as a function
 export function getCurrentUser() {
   return currentUser;
 }
