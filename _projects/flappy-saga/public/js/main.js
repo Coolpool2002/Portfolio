@@ -66,9 +66,35 @@ function showRegister() {
   recordView.style.display = "none";
 }
 
-// Reload page on menu show to ensure fresh UI and correct username
-function showMenu() {
-  window.location.reload();
+async function showMenu() {
+  const currentUser = getCurrentUser();
+
+  document.getElementById("currentUser").textContent = currentUser;
+  loginView.style.display = "none";
+  registerView.style.display = "none";
+  menu.style.display = "block";
+  gameCanvas.style.display = "none";
+  userListView.style.display = "none";
+  recordView.style.display = "none";
+
+  if (currentUser !== "Guest") {
+    const userRef = ref(db, `users/${currentUser}`);
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      gamesPlayedDisplay.textContent = `Games Played: ${data.gamesPlayed || 0}`;
+      highScoreDisplay.textContent = `High Score: ${data.highScore || 0}`;
+      pointsDisplay.textContent = `Points: ${data.points || 0}`;
+    } else {
+      gamesPlayedDisplay.textContent = "";
+      highScoreDisplay.textContent = "";
+      pointsDisplay.textContent = "";
+    }
+  } else {
+    gamesPlayedDisplay.textContent = "";
+    highScoreDisplay.textContent = "";
+    pointsDisplay.textContent = "";
+  }
 }
 
 document.getElementById("registerButton").onclick = async () => {
@@ -98,7 +124,7 @@ document.getElementById("loginButton").onclick = async () => {
   const data = snapshot.val();
   if (data.password === pass) {
     localStorage.setItem("flappyUser", user);
-    showMenu();
+    await showMenu();
   } else {
     alert("Incorrect password.");
   }
