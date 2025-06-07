@@ -28,18 +28,18 @@ export function buyBackground(name, cost) {
     userPoints[user] -= cost;
     updatePointsDisplay(userPoints[user]);
     alert(`${name} background purchased!`);
-    
-    // TODO: Apply the background effect here
-    // Example: document.body.style.backgroundImage = `url('images/${name}.jpg')`;
+
+    // Optional: Apply background change
+    // document.body.style.backgroundImage = `url('images/${name}.jpg')`;
   } else {
     alert("Not enough points.");
   }
 }
 
-// Optional: provide raw access for UI display
+// Optional: get raw points by username
 export function getPoints(user) {
   return userPoints[user] || 0;
 }
 
-// Make buyBackground accessible to inline HTML buttons
+// Allow HTML to use buyBackground directly
 window.buyBackground = buyBackground;
