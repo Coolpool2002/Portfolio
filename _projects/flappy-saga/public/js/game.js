@@ -9,24 +9,22 @@ const gameCanvas = document.getElementById("game");
 const ctx = gameCanvas.getContext("2d");
 
 let flapListenerAdded = false;
-let animationId = null;
 
 export function startGame() {
-  // Hide other views
-  ["loginView", "registerView", "menu", "userListView", "recordView", "shopView"]
-    .forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = "none";
-    });
+  // Hide all other views
+  const views = ["loginView", "registerView", "menu", "userListView", "recordView", "shopView"];
+  for (const id of views) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  }
 
   // Show canvas
   gameCanvas.style.display = "block";
 
-  // Clear previous animation loop if any
-  if (animationId) cancelAnimationFrame(animationId);
-
+  // Clear the canvas before starting
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-  runGame();
+
+  runGame(); // Start game logic
 }
 
 function runGame() {
@@ -36,9 +34,10 @@ function runGame() {
   const flapStrength = -4;
   let score = 0;
   const pipes = [];
+  const redDots = [];
   const gap = 150;
   let frame = 0;
-  let redDot = null;
+  let pipeCount = 0;
   let gameEnded = false;
 
   const flap = () => {
@@ -60,7 +59,7 @@ function runGame() {
     ctx.fillStyle = "skyblue";
     ctx.fillRect(0, 0, 400, 600);
 
-    // Bird
+    // Draw player
     ctx.fillStyle = "yellow";
     ctx.beginPath();
     ctx.arc(100, y, 20, 0, Math.PI * 2);
@@ -71,54 +70,64 @@ function runGame() {
 
     if (y > 580 || y < 0) return endGame();
 
-    // Pipes
+    // Pipes generation
     if (frame % 90 === 0) {
-      const top = Math.floor(Math.random() * 200) + 50;
-      pipes.push({ x: 400, top, bottom: top + gap });
+      const topHeight = Math.floor(Math.random() * 200) + 50;
+      pipes.push({ x: 400, top: topHeight, bottom: topHeight + gap });
+      pipeCount++;
 
-      if (pipes.length % 10 === 0) {
-        redDot = { x: 425, y: top + gap / 2, collected: false };
+      // Spawn red dot every 10 pipes
+      if (pipeCount % 10 === 0) {
+        const dotY = topHeight + gap / 2;
+        redDots.push({ x: 425, y: dotY, radius: 14, collected: false });
       }
     }
 
+    // Draw pipes and check collisions
     ctx.fillStyle = "green";
     for (let pipe of pipes) {
       pipe.x -= 2;
       ctx.fillRect(pipe.x, 0, 50, pipe.top);
       ctx.fillRect(pipe.x, pipe.bottom, 50, 600 - pipe.bottom);
 
-      const hit =
+      const hitPipe =
         100 + 20 > pipe.x &&
         100 - 20 < pipe.x + 50 &&
         (y - 20 < pipe.top || y + 20 > pipe.bottom);
-      if (hit) return endGame();
+
+      if (hitPipe) return endGame();
     }
 
-    // Remove off-screen pipes
-    while (pipes.length && pipes[0].x + 50 < 0) pipes.shift();
+    // Draw and check red dots
+    for (let i = redDots.length - 1; i >= 0; i--) {
+      const dot = redDots[i];
+      if (dot.collected) continue;
 
-    // Red dot
-    if (redDot && !redDot.collected) {
-      redDot.x -= 2;
+      dot.x -= 2;
+
       ctx.fillStyle = "red";
       ctx.beginPath();
-      ctx.arc(redDot.x, redDot.y, 14, 0, Math.PI * 2);
+      ctx.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2);
       ctx.fill();
 
-      if (Math.abs(redDot.x - 100) < 25 && Math.abs(redDot.y - y) < 25) {
-        score += 5;
-        redDot.collected = true;
+      const dx = dot.x - 100;
+      const dy = dot.y - y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < dot.radius + 20) {
+        score += 15;
+        dot.collected = true;
       }
 
-      if (redDot.x < -10) redDot = null;
+      if (dot.x < -10) redDots.splice(i, 1);
     }
 
     // Score display
     ctx.fillStyle = "black";
     ctx.font = "16px Arial";
-    ctx.fillText(`SCORE: ${score} points`, 10, 20);
+    ctx.fillText("SCORE: " + score + " points", 10, 20);
 
-    animationId = requestAnimationFrame(draw);
+    requestAnimationFrame(draw);
   }
 
   function endGame() {
@@ -126,7 +135,6 @@ function runGame() {
     gameEnded = true;
 
     clearInterval(scoreInterval);
-    cancelAnimationFrame(animationId);
     window.removeEventListener("keydown", flap);
     flapListenerAdded = false;
 
