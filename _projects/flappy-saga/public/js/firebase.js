@@ -1,87 +1,78 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  set,
-  get,
-  update,
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, set, get, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
-  authDomain: "flappy-ball-2-leaderboard.firebaseapp.com",
-  projectId: "flappy-ball-2-leaderboard",
-  storageBucket: "flappy-ball-2-leaderboard.appspot.com",
-  messagingSenderId: "678584043682",
-  appId: "1:678584043682:web:869514b82e6b4676c82ffb",
-  measurementId: "G-6MDV8B1CCP",
-  databaseURL: "https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app",
-};
+const db = getDatabase();
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-// Save score to the scores list
+// Save a new score to the leaderboard
 export async function saveScore(name, score) {
-  if (!name || typeof score !== "number") return;
   try {
+    if (!name || typeof score !== "number" || score < 0) throw new Error("Invalid data");
     const scoresRef = ref(db, "scores");
-    await push(scoresRef, {
+    const newScoreRef = push(scoresRef);
+    await set(newScoreRef, {
       name,
       score,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     });
-
-    // Update high score if it's greater than current
-    const userRef = ref(db, `users/${name}`);
-    const snapshot = await get(userRef);
-    const userData = snapshot.exists() ? snapshot.val() : {};
-    const currentBest = userData.highScore || 0;
-
-    if (score > currentBest) {
-      await update(userRef, { highScore: score });
-    }
-
   } catch (e) {
-    console.error("Error saving score:", e);
+    console.error("Failed to save score:", e);
   }
 }
 
-// Load top 10 high scores (best score per user)
+// Load top scores (only highest score per user)
 export async function loadTopScores() {
   try {
-    const scoresRef = ref(db, "users");
+    const scoresRef = ref(db, "scores");
     const snapshot = await get(scoresRef);
     if (!snapshot.exists()) return [];
 
-    const users = snapshot.val();
-    const entries = Object.entries(users)
-      .filter(([_, u]) => typeof u.highScore === "number")
-      .map(([name, u]) => ({ name, score: u.highScore }))
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
+    const raw = snapshot.val();
+    const bestScores = {};
 
-    return entries;
+    for (const key in raw) {
+      const { name, score, timestamp } = raw[key];
+      if (!name || typeof score !== "number") continue;
+
+      if (!bestScores[name] || score > bestScores[name].score) {
+        bestScores[name] = { name, score, timestamp };
+      }
+    }
+
+    return Object.values(bestScores).sort((a, b) => b.score - a.score).slice(0, 10);
   } catch (e) {
-    console.error("Error loading scores:", e);
+    console.error("Failed to load scores:", e);
     return [];
   }
 }
 
-// Increment games played
+// Increment games played counter per user
 export async function incrementGamesPlayed(username) {
-  if (!username) return;
+  if (!username || username === "Guest") return;
+  const userRef = ref(db, `users/${username}`);
   try {
-    const userRef = ref(db, `users/${username}`);
     const snapshot = await get(userRef);
     const data = snapshot.val() || {};
-    const currentCount = data.gamesPlayed || 0;
-    await set(userRef, {
-      ...data,
-      gamesPlayed: currentCount + 1,
-    });
+    const count = data.gamesPlayed || 0;
+    await update(userRef, { gamesPlayed: count + 1 });
   } catch (e) {
-    console.error("Error incrementing games played:", e);
+    console.error("Failed to increment games played:", e);
   }
+}
+
+// Track if this is a new high score and update user data
+export async function updateHighScore(username, score) {
+  if (!username || username === "Guest") return false;
+  const userRef = ref(db, `users/${username}`);
+  try {
+    const snapshot = await get(userRef);
+    const data = snapshot.val() || {};
+    const currentHigh = data.highScore || 0;
+
+    if (score > currentHigh) {
+      await update(userRef, { highScore: score });
+      return true;
+    }
+  } catch (err) {
+    console.error("Error updating high score:", err);
+  }
+  return false;
 }
