@@ -65,9 +65,11 @@ function showRegister() {
 }
 
 async function showMenu() {
-  currentUser = localStorage.getItem("flappyUser") || null; // Sync from localStorage
+  // Always sync currentUser from localStorage to avoid stale or missing username
+  currentUser = localStorage.getItem("flappyUser") || "Guest";
 
-  document.getElementById("currentUser").textContent = currentUser || "Guest";
+  // Update display with correct username
+  document.getElementById("currentUser").textContent = currentUser;
 
   loginView.style.display = "none";
   registerView.style.display = "none";
@@ -77,7 +79,7 @@ async function showMenu() {
   recordView.style.display = "none";
   updateUserPoints(0);
 
-  if (currentUser && currentUser !== "Guest") {
+  if (currentUser !== "Guest") {
     const userRef = ref(db, `users/${currentUser}`);
     const snapshot = await get(userRef);
     if (snapshot.exists()) {
@@ -93,6 +95,7 @@ async function showMenu() {
     highScoreDisplay.textContent = "";
   }
 }
+
 
 const registerBtn = document.getElementById("registerButton");
 registerBtn.onclick = async () => {
