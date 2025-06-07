@@ -3,7 +3,7 @@ import { getDatabase, ref, push, set, get, update } from "https://www.gstatic.co
 const db = getDatabase();
 
 // Save a new score to the leaderboard
-export async function saveScore(name, score) {
+async function saveScore(name, score) {
   try {
     if (!name || typeof score !== "number" || score < 0) throw new Error("Invalid data");
     const scoresRef = ref(db, "scores");
@@ -19,7 +19,7 @@ export async function saveScore(name, score) {
 }
 
 // Load top scores (only highest score per user)
-export async function loadTopScores() {
+async function loadTopScores() {
   try {
     const scoresRef = ref(db, "scores");
     const snapshot = await get(scoresRef);
@@ -45,7 +45,7 @@ export async function loadTopScores() {
 }
 
 // Increment games played counter per user
-export async function incrementGamesPlayed(username) {
+async function incrementGamesPlayed(username) {
   if (!username || username === "Guest") return;
   const userRef = ref(db, `users/${username}`);
   try {
@@ -59,7 +59,7 @@ export async function incrementGamesPlayed(username) {
 }
 
 // Track if this is a new high score and update user data
-export async function updateHighScore(username, score) {
+async function updateHighScore(username, score) {
   if (!username || username === "Guest") return false;
   const userRef = ref(db, `users/${username}`);
   try {
@@ -78,7 +78,7 @@ export async function updateHighScore(username, score) {
 }
 
 // Get full user stats: points, highScore, gamesPlayed, etc.
-export async function getUserStats(username) {
+async function getUserStats(username) {
   if (!username || username === "Guest") return null;
   const userRef = ref(db, `users/${username}`);
 
