@@ -25,7 +25,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let currentUser = null;
 const userPoints = {};
 
 const loginView = document.getElementById("loginView");
@@ -40,7 +39,12 @@ const pointsDisplay = document.getElementById("pointsDisplay");
 const gamesPlayedDisplay = document.getElementById("gamesPlayedDisplay");
 const highScoreDisplay = document.getElementById("highScoreDisplay");
 
+export function getCurrentUser() {
+  return localStorage.getItem("flappyUser") || "Guest";
+}
+
 function updateUserPoints(score) {
+  const currentUser = getCurrentUser();
   if (!currentUser) return;
   userPoints[currentUser] = (userPoints[currentUser] || 0) + score;
   if (pointsDisplay) pointsDisplay.textContent = `Points: ${userPoints[currentUser]}`;
@@ -65,10 +69,8 @@ function showRegister() {
 }
 
 async function showMenu() {
-  // Always sync currentUser from localStorage to avoid stale or missing username
-  currentUser = localStorage.getItem("flappyUser") || "Guest";
+  const currentUser = getCurrentUser();
 
-  // Update display with correct username
   document.getElementById("currentUser").textContent = currentUser;
 
   loginView.style.display = "none";
@@ -95,7 +97,6 @@ async function showMenu() {
     highScoreDisplay.textContent = "";
   }
 }
-
 
 const registerBtn = document.getElementById("registerButton");
 registerBtn.onclick = async () => {
@@ -126,7 +127,6 @@ loginBtn.onclick = async () => {
   const data = snapshot.val();
   if (data.password === pass) {
     localStorage.setItem("flappyUser", user);
-    currentUser = user;
     showMenu();
   } else {
     alert("Incorrect password.");
@@ -136,13 +136,11 @@ loginBtn.onclick = async () => {
 document.getElementById("guestLink").onclick = (e) => {
   e.preventDefault();
   localStorage.setItem("flappyUser", "Guest");
-  currentUser = "Guest";
   showMenu();
 };
 
 document.getElementById("logoutButton").onclick = () => {
   localStorage.removeItem("flappyUser");
-  currentUser = null;
   showLogin();
 };
 
@@ -206,17 +204,11 @@ async function showRecords() {
   }
 }
 
-// On page load
-const savedUser = localStorage.getItem("flappyUser");
-if (savedUser) {
-  currentUser = savedUser;
+// On page load, show appropriate view:
+if (localStorage.getItem("flappyUser")) {
   showMenu();
 } else {
   showLogin();
-}
-
-export function getCurrentUser() {
-  return currentUser;
 }
 
 export {
@@ -228,4 +220,5 @@ export {
   remove,
   updateUserPoints,
   loadTopScores,
+  getCurrentUser,
 };
