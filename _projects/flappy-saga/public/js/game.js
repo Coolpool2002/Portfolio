@@ -23,14 +23,19 @@ function runGame() {
   const gap = 150;
   let frame = 0;
   let redDot = null;
+  let gameEnded = false;
 
-  const flap = () => { velocity = flapStrength; };
+  const flap = () => {
+    velocity = flapStrength;
+  };
   window.removeEventListener("keydown", flap);
   window.addEventListener("keydown", flap);
 
   const scoreInterval = setInterval(() => score++, 1000);
 
   function draw() {
+    if (gameEnded) return;
+
     frame++;
     ctx.clearRect(0, 0, 400, 600);
     ctx.fillStyle = "skyblue";
@@ -49,7 +54,9 @@ function runGame() {
     if (frame % 90 === 0) {
       const topHeight = Math.floor(Math.random() * 200) + 50;
       pipes.push({ x: 400, top: topHeight, bottom: topHeight + gap });
-      if (pipes.length % 10 === 0) redDot = { x: 425, y: topHeight + gap / 2, collected: false };
+      if (pipes.length % 10 === 0) {
+        redDot = { x: 425, y: topHeight + gap / 2, collected: false };
+      }
     }
 
     ctx.fillStyle = "green";
@@ -86,6 +93,9 @@ function runGame() {
   }
 
   function gameOver() {
+    if (gameEnded) return;
+    gameEnded = true;
+
     clearInterval(scoreInterval);
     window.removeEventListener("keydown", flap);
     try {
@@ -99,4 +109,4 @@ function runGame() {
   }
 
   draw();
-} 
+}
