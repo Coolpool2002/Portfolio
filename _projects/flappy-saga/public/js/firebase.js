@@ -76,3 +76,25 @@ export async function updateHighScore(username, score) {
   }
   return false;
 }
+
+// Get full user stats: points, highScore, gamesPlayed, etc.
+export async function getUserStats(username) {
+  if (!username || username === "Guest") return null;
+  const userRef = ref(db, `users/${username}`);
+
+  try {
+    const snapshot = await get(userRef);
+    return snapshot.exists() ? snapshot.val() : null;
+  } catch (e) {
+    console.error("Failed to get user stats:", e);
+    return null;
+  }
+}
+
+export {
+  saveScore,
+  loadTopScores,
+  incrementGamesPlayed,
+  updateHighScore,
+  getUserStats
+};
