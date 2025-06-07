@@ -17,7 +17,7 @@
       padding: 10px;
       font-size: 1rem;
     }
-    #menu, #game, #loginView, #registerView, #userListView, #recordView {
+    #menu, #game, #loginView, #registerView, #userListView, #recordView, #shopView {
       display: none;
     }
   </style>
@@ -43,23 +43,22 @@
 
   <div id="menu">
     <h1>Welcome, <span id="currentUser"></span></h1>
+    <div id="pointsDisplay"></div>
     <button id="startGameButton">Play Flappy Ball 2</button>
     <button id="manageUsersButton">Manage Users</button>
     <button id="viewRecordsButton">View Records</button>
     <button id="logoutButton">Logout</button>
-      <button id="shopButton">Shop</button>
+    <button id="shopButton">Shop</button>
   </div>
 
-<div id="shopView" style="display:none;">
-  <h2>Shop</h2>
-  <div id="pointsDisplay"></div>
-  <!-- Add your shop items/buttons for backgrounds/skins here -->
-  <button onclick="buyBackground('forest', 100)">Buy Forest Background (100 points)</button>
-  <button onclick="buyBackground('night', 200)">Buy Night Background (200 points)</button>
-  <!-- Add more items as needed -->
-  <button id="backFromShopButton">Back</button>
-</div>
-  
+  <div id="shopView">
+    <h2>Shop</h2>
+    <div id="pointsDisplay"></div>
+    <button onclick="buyBackground('forest', 100)">Buy Forest Background (100 points)</button>
+    <button onclick="buyBackground('night', 200)">Buy Night Background (200 points)</button>
+    <button id="backFromShopButton">Back</button>
+  </div>
+
   <div id="userListView">
     <h2>All Users</h2>
     <div id="userList"></div>
@@ -131,21 +130,9 @@
       }
     };
 
-    // Optional: Cleanup function to remove malformed entries
-    async function cleanBadScores() {
-      const snapshot = await get(ref(db, "scores"));
-      if (!snapshot.exists()) return;
-      const raw = snapshot.val();
-      for (let key in raw) {
-        const { name, score } = raw[key];
-        if (typeof name !== "string" || typeof score !== "number") {
-          await remove(ref(db, `scores/${key}`));
-        }
-      }
-    }
-
     const users = { admin: "admin123" };
     let currentUser = null;
+    const userPoints = {};
 
     const loginView = document.getElementById("loginView");
     const registerView = document.getElementById("registerView");
@@ -156,6 +143,15 @@
     const ctx = gameCanvas.getContext("2d");
     const recordView = document.getElementById("recordView");
     const recordList = document.getElementById("recordList");
+
+    function updateUserPoints(score) {
+      if (!currentUser) return;
+      userPoints[currentUser] = (userPoints[currentUser] || 0) + score;
+      const display = document.getElementById("pointsDisplay");
+      if (display) {
+        display.textContent = `Points: ${userPoints[currentUser]}`;
+      }
+    }
 
     function showLogin() {
       loginView.style.display = "block";
@@ -183,6 +179,7 @@
       gameCanvas.style.display = "none";
       userListView.style.display = "none";
       recordView.style.display = "none";
+      updateUserPoints(0); // ensure display is refreshed
     }
 
     document.getElementById("loginButton").onclick = () => {
@@ -367,14 +364,18 @@
         requestAnimationFrame(draw);
       }
 
-     function gameOver() {
-  clearInterval(scoreInterval);
-  window.removeEventListener("keydown", flap);
-  window.saveScore(currentUser, score);
-  updateUserPoints(score); // <-- ADD THIS
-  alert("Game Over! You earned: " + score + " points");
-  showMenu();
-}
+      function gameOver() {
+        clearInterval(scoreInterval);
+        window.removeEventListener("keydown", flap);
+        try {
+          window.saveScore(currentUser, score);
+          updateUserPoints(score);
+        } catch (e) {
+          console.error("Error during game over:", e);
+        }
+        alert("Game Over! You earned: " + score + " points");
+        showMenu();
+      }
 
       draw();
     }
