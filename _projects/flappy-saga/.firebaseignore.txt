@@ -1,0 +1,3 @@
+firebase.json
+**/.*      # ignore dotfiles (like .git or .DS_Store)
+**/node_modules/
