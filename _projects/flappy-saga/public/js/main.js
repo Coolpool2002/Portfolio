@@ -39,6 +39,7 @@ const pointsDisplay = document.getElementById("pointsDisplay");
 const gamesPlayedDisplay = document.getElementById("gamesPlayedDisplay");
 const highScoreDisplay = document.getElementById("highScoreDisplay");
 
+// Named export here
 export function getCurrentUser() {
   return localStorage.getItem("flappyUser") || "Guest";
 }
@@ -204,21 +205,9 @@ async function showRecords() {
   }
 }
 
-// On page load, show appropriate view:
+// On page load, show menu or login
 if (localStorage.getItem("flappyUser")) {
   showMenu();
 } else {
   showLogin();
 }
-
-export {
-  getDatabase,
-  ref,
-  push,
-  set,
-  get,
-  remove,
-  updateUserPoints,
-  loadTopScores,
-  getCurrentUser,
-};
