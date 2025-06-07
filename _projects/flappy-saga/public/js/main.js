@@ -39,7 +39,7 @@ const pointsDisplay = document.getElementById("pointsDisplay");
 const gamesPlayedDisplay = document.getElementById("gamesPlayedDisplay");
 const highScoreDisplay = document.getElementById("highScoreDisplay");
 
-// Named export here
+// Named export - only export here once
 export function getCurrentUser() {
   return localStorage.getItem("flappyUser") || "Guest";
 }
