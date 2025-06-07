@@ -23,7 +23,6 @@
   </style>
 </head>
 <body>
-  <!-- UI Views -->
   <div id="loginView">
     <h1>Login</h1>
     <input type="text" id="loginUsername" placeholder="Username"><br>
@@ -32,7 +31,6 @@
     <p>Don't have an account? <a href="#" id="showRegisterLink">Register here</a></p>
     <p><a href="#" id="guestLink">Sign in as Guest</a></p>
   </div>
-
   <div id="registerView">
     <h1>Register</h1>
     <input type="text" id="registerUsername" placeholder="Username"><br>
@@ -40,7 +38,6 @@
     <button id="registerButton">Register</button>
     <p>Already have an account? <a href="#" id="showLoginLink">Login</a></p>
   </div>
-
   <div id="menu">
     <h1>Welcome, <span id="currentUser"></span></h1>
     <button id="startGameButton">Play Flappy Ball 2</button>
@@ -48,19 +45,16 @@
     <button id="viewRecordsButton">View Records</button>
     <button id="logoutButton">Logout</button>
   </div>
-
   <div id="userListView">
     <h2>All Users</h2>
     <div id="userList"></div>
     <button id="backFromUsersButton">Back</button>
   </div>
-
   <div id="recordView">
     <h2>All Scores</h2>
     <div id="recordList"></div>
     <button id="backFromRecordsButton">Back</button>
   </div>
-
   <canvas id="game" width="400" height="600"></canvas>
 
   <script type="module">
@@ -85,7 +79,6 @@
       try {
         if (typeof name !== "string" || name.trim() === "") throw new Error("Invalid name");
         if (typeof score !== "number" || isNaN(score) || score < 0) throw new Error("Invalid score");
-
         const scoresRef = ref(db, "scores");
         const newScoreRef = push(scoresRef);
         await set(newScoreRef, {
@@ -103,39 +96,19 @@
         const scoresRef = ref(db, "scores");
         const snapshot = await get(scoresRef);
         if (!snapshot.exists()) return [];
-
         const raw = snapshot.val();
         const scores = Object.keys(raw).map(key => raw[key]);
-
-        const validScores = scores.filter(s =>
-          typeof s.score === "number" &&
-          typeof s.name === "string" &&
-          s.name.trim().length > 0
-        );
-
-        return validScores.sort((a, b) => b.score - a.score).slice(0, 10);
+        return scores.filter(s => typeof s.score === "number" && typeof s.name === "string")
+                     .sort((a, b) => b.score - a.score)
+                     .slice(0, 10);
       } catch (e) {
         console.error("Failed to load scores:", e);
         return [];
       }
     };
 
-    // Optional: Cleanup function to remove malformed entries
-    async function cleanBadScores() {
-      const snapshot = await get(ref(db, "scores"));
-      if (!snapshot.exists()) return;
-      const raw = snapshot.val();
-      for (let key in raw) {
-        const { name, score } = raw[key];
-        if (typeof name !== "string" || typeof score !== "number") {
-          await remove(ref(db, `scores/${key}`));
-        }
-      }
-    }
-
     const users = { admin: "admin123" };
     let currentUser = null;
-
     const loginView = document.getElementById("loginView");
     const registerView = document.getElementById("registerView");
     const menu = document.getElementById("menu");
@@ -154,7 +127,6 @@
       userListView.style.display = "none";
       recordView.style.display = "none";
     }
-
     function showRegister() {
       loginView.style.display = "none";
       registerView.style.display = "block";
@@ -163,7 +135,6 @@
       userListView.style.display = "none";
       recordView.style.display = "none";
     }
-
     function showMenu() {
       document.getElementById("currentUser").textContent = currentUser || "Guest";
       loginView.style.display = "none";
@@ -228,16 +199,12 @@
       userList.innerHTML = "";
       Object.keys(users).forEach(user => {
         const div = document.createElement("div");
-        div.style.textAlign = "center";
-        div.style.marginBottom = "10px";
-
         const span = document.createElement("span");
         span.textContent = user;
         span.style.display = "inline-block";
         span.style.width = "200px";
         span.style.color = "white";
         div.appendChild(span);
-
         if (currentUser === "admin") {
           const delBtn = document.createElement("button");
           delBtn.textContent = "Delete";
@@ -245,7 +212,6 @@
           delBtn.addEventListener("click", () => deleteUser(user));
           div.appendChild(delBtn);
         }
-
         userList.appendChild(div);
       });
       menu.style.display = "none";
@@ -294,11 +260,9 @@
       const gap = 150;
       let frame = 0;
       let redDot = null;
-
       const flap = () => { velocity = flapStrength; };
       window.removeEventListener("keydown", flap);
       window.addEventListener("keydown", flap);
-
       const scoreInterval = setInterval(() => score++, 1000);
 
       function draw() {
@@ -314,7 +278,6 @@
 
         velocity += gravity;
         y += velocity;
-
         if (y > 580 || y < 0) return gameOver();
 
         if (frame % 90 === 0) {
@@ -328,7 +291,6 @@
           pipe.x -= 2;
           ctx.fillRect(pipe.x, 0, 50, pipe.top);
           ctx.fillRect(pipe.x, pipe.bottom, 50, 600 - pipe.bottom);
-
           if (
             100 + 20 > pipe.x &&
             100 - 20 < pipe.x + 50 &&
@@ -342,7 +304,6 @@
           ctx.beginPath();
           ctx.arc(redDot.x, redDot.y, 14, 0, Math.PI * 2);
           ctx.fill();
-
           if (Math.abs(redDot.x - 100) < 25 && Math.abs(redDot.y - y) < 25) {
             score += 5;
             redDot.collected = true;
