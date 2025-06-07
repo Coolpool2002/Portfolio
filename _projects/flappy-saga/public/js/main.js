@@ -5,7 +5,7 @@ import { showLogin, showRegister, showMenu } from "./ui.js";
 import { startGame } from "./game.js";
 import { showUsers } from "./users.js";
 import { showRecords } from "./firebase.js";
-import { updateUserPoints, buyBackground } from "./shop.js";
+import { updateUserPoints, initShopView } from "./shop.js";
 
 // DOM Elements
 const loginBtn = document.getElementById("loginButton");
@@ -19,12 +19,8 @@ const manageUsersBtn = document.getElementById("manageUsersButton");
 const viewRecordsBtn = document.getElementById("viewRecordsButton");
 const backFromUsersBtn = document.getElementById("backFromUsersButton");
 const backFromRecordsBtn = document.getElementById("backFromRecordsButton");
-const shopBtn = document.getElementById("shopButton");
-const backFromShopBtn = document.getElementById("backFromShopButton");
-const buyForestBtn = document.getElementById("buyForestBtn");
-const buyNightBtn = document.getElementById("buyNightBtn");
 
-// Login
+// Login flow
 loginBtn.onclick = () => {
   const user = document.getElementById("loginUsername").value;
   const pass = document.getElementById("loginPassword").value;
@@ -74,19 +70,8 @@ viewRecordsBtn.onclick = () => showRecords();
 backFromUsersBtn.onclick = () => showMenu();
 backFromRecordsBtn.onclick = () => showMenu();
 
-shopBtn.onclick = () => {
-  document.getElementById("menu").style.display = "none";
-  document.getElementById("shopView").style.display = "block";
-};
+// Initialize shop logic
+initShopView();
 
-backFromShopBtn.onclick = () => {
-  document.getElementById("shopView").style.display = "none";
-  document.getElementById("menu").style.display = "block";
-};
-
-// Shop purchases
-buyForestBtn.onclick = () => buyBackground("forest", 100);
-buyNightBtn.onclick = () => buyBackground("night", 200);
-
-// Start view
+// Start at login screen
 showLogin();

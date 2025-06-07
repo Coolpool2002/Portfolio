@@ -28,18 +28,38 @@ export function buyBackground(name, cost) {
     userPoints[user] -= cost;
     updatePointsDisplay(userPoints[user]);
     alert(`${name} background purchased!`);
-
-    // Optional: Apply background change
+    
+    // Example: apply background change
     // document.body.style.backgroundImage = `url('images/${name}.jpg')`;
   } else {
     alert("Not enough points.");
   }
 }
 
-// Optional: get raw points by username
-export function getPoints(user) {
-  return userPoints[user] || 0;
-}
+// Set up shop buttons and view logic
+export function initShopView() {
+  const shopBtn = document.getElementById("shopButton");
+  const backFromShopBtn = document.getElementById("backFromShopButton");
 
-// Allow HTML to use buyBackground directly
-window.buyBackground = buyBackground;
+  shopBtn.onclick = () => {
+    document.getElementById("menu").style.display = "none";
+    document.getElementById("shopView").style.display = "block";
+  };
+
+  backFromShopBtn.onclick = () => {
+    document.getElementById("shopView").style.display = "none";
+    document.getElementById("menu").style.display = "block";
+  };
+
+  const shopItems = [
+    { id: "buyForestBtn", name: "forest", cost: 100 },
+    { id: "buyNightBtn", name: "night", cost: 200 }
+  ];
+
+  shopItems.forEach(({ id, name, cost }) => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.onclick = () => buyBackground(name, cost);
+    }
+  });
+}
