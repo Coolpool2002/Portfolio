@@ -1,5 +1,3 @@
-// == main.js ==
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
   getDatabase,
@@ -7,9 +5,10 @@ import {
   push,
   set,
   get,
-  remove
+  remove,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 import { startGame } from "./game.js";
+import { loadTopScores } from "./firebase.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAytbPQR5h8w8YmR-zo-xpBNn6lYlVmZjk",
@@ -20,7 +19,7 @@ const firebaseConfig = {
   appId: "1:678584043682:web:869514b82e6b4676c82ffb",
   measurementId: "G-6MDV8B1CCP",
   databaseURL:
-    "https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app"
+    "https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -177,23 +176,24 @@ function showUsers() {
 
 async function showRecords() {
   recordList.innerHTML = "Loading...";
-  const snapshot = await get(ref(db, "scores"));
-  recordList.innerHTML = "";
-  if (!snapshot.exists()) {
-    recordList.innerHTML = "No records found.";
-    return;
-  }
-  const scores = Object.values(snapshot.val())
-    .filter((s) => typeof s.name === "string" && typeof s.score === "number")
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
-
-  for (let i = 0; i < scores.length; i++) {
-    const s = scores[i];
-    const div = document.createElement("div");
-    const date = new Date(s.timestamp || Date.now()).toLocaleString();
-    div.textContent = `#${i + 1} ${s.name}: ${s.score} points (${date})`;
-    recordList.appendChild(div);
+  try {
+    const scores = await loadTopScores();
+    recordList.innerHTML = "";
+    if (scores.length === 0) {
+      recordList.innerHTML = "No records found.";
+    } else {
+      scores.forEach((r, i) => {
+        const div = document.createElement("div");
+        const date = new Date(r.timestamp || Date.now()).toLocaleString();
+        div.textContent = `#${i + 1} ${r.name}: ${r.score} points (${date})`;
+        recordList.appendChild(div);
+      });
+    }
+    menu.style.display = "none";
+    recordView.style.display = "block";
+  } catch (e) {
+    console.error("Failed to load records:", e);
+    recordList.innerHTML = "Failed to load records.";
   }
 }
 
@@ -213,5 +213,6 @@ export {
   get,
   remove,
   updateUserPoints,
-  currentUser as getCurrentUser
+  currentUser as getCurrentUser,
+  loadTopScores,
 };

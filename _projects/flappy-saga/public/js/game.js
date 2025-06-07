@@ -1,9 +1,7 @@
-// == game.js ==
-
 import { updateUserPoints } from "./shop.js";
 import { saveScore, updateHighScore, incrementGamesPlayed, getUserStats } from "./firebase.js";
 import { getCurrentUser } from "./main.js";
-import { showMenu, updatePointsDisplay } from "./ui.js";
+import { showMenu } from "./ui.js";
 
 const gameCanvas = document.getElementById("game");
 const ctx = gameCanvas.getContext("2d");
@@ -122,10 +120,9 @@ function runGame() {
       console.error("Error on endGame:", e);
     }
 
-    setTimeout(() => {
-      alert(`Game Over! You earned: ${score} points` + (isNewHigh ? "\nNew High Score! 🎉" : ""));
-      showMenu();
-    }, 100);
+    // Show alert, then navigate
+    alert(`Game Over! You earned: ${score} points${isNewHigh ? "\nNew High Score! 🎉" : ""}`);
+    showMenu();
   }
 
   draw();
