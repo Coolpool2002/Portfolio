@@ -120,9 +120,17 @@ function runGame() {
       console.error("Error on endGame:", e);
     }
 
-    // Show alert, then navigate
-    alert(`Game Over! You earned: ${score} points${isNewHigh ? "\nNew High Score! 🎉" : ""}`);
-    showMenu();
+    const modal = document.getElementById("gameOverModal");
+    const message = document.getElementById("gameOverMessage");
+    const closeBtn = document.getElementById("gameOverCloseBtn");
+
+    message.textContent = `Game Over! You earned: ${score} points${isNewHigh ? " - New High Score! 🎉" : ""}`;
+    modal.style.display = "block";
+
+    closeBtn.onclick = () => {
+      modal.style.display = "none";
+      showMenu();
+    };
   }
 
   draw();
