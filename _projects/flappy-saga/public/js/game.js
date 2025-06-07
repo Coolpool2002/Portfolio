@@ -34,10 +34,9 @@ function runGame() {
   const flapStrength = -4;
   let score = 0;
   const pipes = [];
-  const redDots = [];
   const gap = 150;
   let frame = 0;
-  let pipeCount = 0;
+  let redDot = null;
   let gameEnded = false;
 
   const flap = () => {
@@ -74,12 +73,10 @@ function runGame() {
     if (frame % 90 === 0) {
       const topHeight = Math.floor(Math.random() * 200) + 50;
       pipes.push({ x: 400, top: topHeight, bottom: topHeight + gap });
-      pipeCount++;
 
       // Spawn red dot every 10 pipes
-      if (pipeCount % 10 === 0) {
-        const dotY = topHeight + gap / 2;
-        redDots.push({ x: 425, y: dotY, radius: 14, collected: false });
+      if (pipes.length % 10 === 0) {
+        redDot = { x: 425, y: topHeight + gap / 2, collected: false };
       }
     }
 
@@ -98,28 +95,20 @@ function runGame() {
       if (hitPipe) return endGame();
     }
 
-    // Draw and check red dots
-    for (let i = redDots.length - 1; i >= 0; i--) {
-      const dot = redDots[i];
-      if (dot.collected) continue;
-
-      dot.x -= 2;
-
+    // Red dot logic
+    if (redDot && !redDot.collected) {
+      redDot.x -= 2;
       ctx.fillStyle = "red";
       ctx.beginPath();
-      ctx.arc(dot.x, dot.y, dot.radius, 0, Math.PI * 2);
+      ctx.arc(redDot.x, redDot.y, 14, 0, Math.PI * 2);
       ctx.fill();
 
-      const dx = dot.x - 100;
-      const dy = dot.y - y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist < dot.radius + 20) {
-        score += 15;
-        dot.collected = true;
+      if (Math.abs(redDot.x - 100) < 25 && Math.abs(redDot.y - y) < 25) {
+        score += 5; // working value from tested HTML version
+        redDot.collected = true;
       }
 
-      if (dot.x < -10) redDots.splice(i, 1);
+      if (redDot.x < -10) redDot = null;
     }
 
     // Score display
