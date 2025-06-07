@@ -17,6 +17,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+console.log("Firebase connected:", app.name);
 
 let currentUser = null;
 const loginView = document.getElementById("loginView");
@@ -84,15 +85,21 @@ registerBtn.onclick = async () => {
   const pass = document.getElementById("registerPassword").value.trim();
   if (!user || !pass) return alert("Username and password required.");
 
-  const userRef = ref(db, `users/${user}`);
-  const snapshot = await get(userRef);
-  if (snapshot.exists()) {
-    alert("User already exists.");
-  } else {
-    const hashed = await hashPassword(pass);
-    await set(userRef, { password: hashed, points: 0 });
-    alert("Account created!");
-    showLogin();
+  try {
+    const userRef = ref(db, `users/${user}`);
+    const snapshot = await get(userRef);
+
+    if (snapshot.exists()) {
+      alert("User already exists.");
+    } else {
+      const hashed = await hashPassword(pass);
+      await set(userRef, { password: hashed, points: 0 });
+      alert("Account created!");
+      showLogin();
+    }
+  } catch (err) {
+    console.error("Failed to register user:", err);
+    alert("Registration failed. Check console.");
   }
 };
 
@@ -191,7 +198,7 @@ async function showRecords() {
 const savedUser = localStorage.getItem("flappyUser");
 if (savedUser) {
   currentUser = savedUser;
-  showMenu();
+  updateUserPoints(0).then(showMenu);
 } else {
   showLogin();
 }
