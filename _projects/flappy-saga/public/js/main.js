@@ -36,7 +36,7 @@ const pointsDisplay = document.getElementById("pointsDisplay");
 const gamesPlayedDisplay = document.getElementById("gamesPlayedDisplay");
 const highScoreDisplay = document.getElementById("highScoreDisplay");
 
-export function getCurrentUser() {
+function getCurrentUser() {
   return localStorage.getItem("flappyUser") || "Guest";
 }
 
@@ -202,7 +202,6 @@ async function showRecords() {
   }
 }
 
-// On page load
 window.onload = () => {
   if (localStorage.getItem("flappyUser")) {
     showMenu();
@@ -211,5 +210,4 @@ window.onload = () => {
   }
 };
 
-// Export getCurrentUser so game.js can import it
 export { getCurrentUser, updateUserPoints };
