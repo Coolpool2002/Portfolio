@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Account Management + Flappy Bird</title>
   <style>
     body {
@@ -23,7 +23,8 @@
   </style>
 </head>
 <body>
-  <!-- UI Views -->
+
+  <!-- Login View -->
   <div id="loginView">
     <h1>Login</h1>
     <input type="text" id="loginUsername" placeholder="Username"><br>
@@ -33,6 +34,7 @@
     <p><a href="#" id="guestLink">Sign in as Guest</a></p>
   </div>
 
+  <!-- Register View -->
   <div id="registerView">
     <h1>Register</h1>
     <input type="text" id="registerUsername" placeholder="Username"><br>
@@ -41,6 +43,7 @@
     <p>Already have an account? <a href="#" id="showLoginLink">Login</a></p>
   </div>
 
+  <!-- Menu View -->
   <div id="menu">
     <h1>Welcome, <span id="currentUser"></span></h1>
     <div id="pointsDisplay"></div>
@@ -51,6 +54,7 @@
     <button id="shopButton">Shop</button>
   </div>
 
+  <!-- Shop View -->
   <div id="shopView">
     <h2>Shop</h2>
     <div id="pointsDisplay"></div>
@@ -59,21 +63,25 @@
     <button id="backFromShopButton">Back</button>
   </div>
 
+  <!-- User List View -->
   <div id="userListView">
     <h2>All Users</h2>
     <div id="userList"></div>
     <button id="backFromUsersButton">Back</button>
   </div>
 
+  <!-- Record View -->
   <div id="recordView">
     <h2>All Scores</h2>
     <div id="recordList"></div>
     <button id="backFromRecordsButton">Back</button>
   </div>
 
+  <!-- Game Canvas -->
   <canvas id="game" width="400" height="600"></canvas>
 
-  <!-- ✅ Load your modular script entry point -->
+  <!-- Load entry module -->
   <script type="module" src="js/main.js"></script>
+
 </body>
 </html>

@@ -1,6 +1,7 @@
 // == ui.js ==
 
 import { getCurrentUser } from "./auth.js";
+import { getPointsForUser } from "./shop.js";
 
 const loginView = document.getElementById("loginView");
 const registerView = document.getElementById("registerView");
@@ -40,8 +41,10 @@ export function showMenu() {
   updatePointsDisplay();
 }
 
-export function updatePointsDisplay(points = 0) {
+export function updatePointsDisplay(points) {
   if (pointsDisplay) {
-    pointsDisplay.textContent = `Points: ${points}`;
+    const displayPoints =
+      typeof points === "number" ? points : getPointsForUser(getCurrentUser());
+    pointsDisplay.textContent = `Points: ${displayPoints}`;
   }
-} 
+}

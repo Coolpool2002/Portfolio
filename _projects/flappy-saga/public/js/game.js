@@ -1,5 +1,6 @@
 // == game.js ==
 
+import { updateUserPoints } from "./shop.js";
 import { saveScore } from "./firebase.js";
 import { getCurrentUser } from "./auth.js";
 import { showMenu, updatePointsDisplay } from "./ui.js";
@@ -89,7 +90,7 @@ function runGame() {
     window.removeEventListener("keydown", flap);
     try {
       saveScore(getCurrentUser(), score);
-      updatePointsDisplay(score);
+      updateUserPoints(score);
     } catch (e) {
       console.error("Error during game over:", e);
     }
