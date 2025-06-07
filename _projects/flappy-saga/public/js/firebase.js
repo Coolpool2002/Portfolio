@@ -20,11 +20,9 @@ const firebaseConfig = {
     "https://flappy-ball-2-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app",
 };
 
-// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Save a new score to the leaderboard
 async function saveScore(name, score) {
   try {
     if (!name || typeof score !== "number" || score < 0) throw new Error("Invalid data");
@@ -40,7 +38,6 @@ async function saveScore(name, score) {
   }
 }
 
-// Load top scores (only highest score per user)
 async function loadTopScores() {
   try {
     const scoresRef = ref(db, "scores");
@@ -66,7 +63,6 @@ async function loadTopScores() {
   }
 }
 
-// Increment games played counter per user
 async function incrementGamesPlayed(username) {
   if (!username || username === "Guest") return;
   const userRef = ref(db, `users/${username}`);
@@ -80,7 +76,6 @@ async function incrementGamesPlayed(username) {
   }
 }
 
-// Track if this is a new high score and update user data
 async function updateHighScore(username, score) {
   if (!username || username === "Guest") return false;
   const userRef = ref(db, `users/${username}`);
@@ -99,7 +94,6 @@ async function updateHighScore(username, score) {
   return false;
 }
 
-// Get full user stats: points, highScore, gamesPlayed, etc.
 async function getUserStats(username) {
   if (!username || username === "Guest") return null;
   const userRef = ref(db, `users/${username}`);
