@@ -22,7 +22,7 @@ export function startGame() {
 function runGame() {
   let y = 200;
   let velocity = 0;
-  const gravity = 0.10;
+  const gravity = 0.050;
   const flapStrength = -4;
   let score = 0;
   const pipes = [];
