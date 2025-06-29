@@ -1,0 +1,31 @@
+# Hayden's Project Portfolio
+
+This is a collection of personal projects I’ve worked on over time — covering electronics, motorbike restoration, 3D printing, and coding.
+
+I’ve grouped things by category so it’s easy to navigate. Most folders have photos, notes, or code depending on the project.
+
+## 🛠 Motorbike Projects
+- Work on a Royal Enfield Himalayan: replaced the swingarm, rebuilt the rear brake, and made a custom intake bell using a 3D printer.
+- Built an Arduino-based diagnostic tool that plugs into the Euro 4 port — can read/clear codes and stream live engine data.
+
+## 🔌 Electronics
+- Reverse engineered a Genio smart downlight using an ESP8266.
+- Breadboarded small circuits and tested microcontroller setups with Arduino and Raspberry Pi.
+
+## 🖨 3D Printing
+- Designed and printed a modular gear ratio demo system.
+- Made functional parts like an intake bell, a DVD tray stash box, and Xbox controller thumbstick extensions.
+
+## 💻 Programming
+- **Flappy Ball 1 & 2**: simple games made in Python and JavaScript, with login and score tracking features.
+- Other mini projects like a number guessing game.
+
+## 📁 Folder Overview
+Portfolio/
+├── 3d printing/
+├── electronics/
+├── Motor bike restoration/
+└── programming/
+
+
+> *"If you can't open it, you don't own it." – Embracing DIY engineering, diagnostics, and repair.*
