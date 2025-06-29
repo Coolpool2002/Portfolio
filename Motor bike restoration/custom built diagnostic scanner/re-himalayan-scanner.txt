@@ -1,0 +1,15 @@
+This project involved building a diagnostic interface for a 2021 Royal Enfield Himalayan using the Euro 4 (6-pin) diagnostic port.
+
+    Designed and prototyped a circuit using 2 × 4N35 optocouplers for safe K-Line communication
+
+    Interfaced the bike’s K-Line (ISO 9141) with an Arduino Uno using custom-built hardware
+
+    Implemented basic KWP2000 protocol functions to read and clear fault codes, including persistent ABS faults
+
+    Added serial output for monitoring responses and diagnostic feedback in real time
+
+    Housed the circuit in a custom 3D-printed case designed to fit under the bike seat
+
+    Successfully cleared fault codes without relying on dealership tools or OBD adapters
+
+This project demonstrated practical skills in serial communication, automotive protocols, opto-isolation, and hardware prototyping.

@@ -1,0 +1,10 @@
+Royal Enfield Himalayan – 3D-Printed Intake Bell Housing
+
+Designed and printed a replacement intake bell housing for a 2021 Royal Enfield Himalayan.
+
+- Modeled in FreeCAD to match OEM mounting points and dimensions
+- Printed in PETG with 0.2mm layers and 40% infill for durability
+- Improved airflow and serviceability over stock component
+- Installed using factory bolts with a precision press-fit
+
+Demonstrated CAD design, 3D printing, and functional part prototyping for real-world use.

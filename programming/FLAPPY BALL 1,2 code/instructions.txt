@@ -1,0 +1,2 @@
+flappy-ball-1 is a python3 file running tinkter so it must be installed to run
+thats why i decided to make flappyball 2 in html so it could be played in browser

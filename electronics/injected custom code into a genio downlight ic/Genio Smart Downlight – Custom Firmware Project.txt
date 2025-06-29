@@ -1,0 +1,13 @@
+In this project, I reverse-engineered a Genio Wi-Fi smart downlight to regain local control without relying on cloud services.
+
+    Disassembled the light and identified the onboard WB3S module (Tuya-based Wi-Fi chip)
+
+    Soldered to the serial TX/RX/GND pads to access the chip via UART
+
+    Used BKWriter tool to flash custom firmware (e.g. OpenBeken or Tasmota)
+
+    Enabled local control over Wi-Fi without using the Genio app or Tuya cloud
+
+    Verified functionality by toggling brightness and power from a local web interface
+
+This project showcased practical skills in soldering, serial communication, and embedded firmware replacement.
